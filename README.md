@@ -96,10 +96,14 @@ The current implementation passes lint, build, audit, backend compile, and backe
 5. Create a patch proposal through `/api/patch/proposals`, apply it through `/api/patch/apply` with `confirm: true`, and confirm checksum mismatches are rejected.
 6. Open Test Suites and run an approved command; confirm Results and Terminal show real stdout/stderr, status, exit code, and duration.
 
+## Font And Icon Fallback Plan
+
+The app currently loads Inter, JetBrains Mono, and Material Symbols from Google Fonts in `index.html`. CSS falls back to system sans/monospace fonts and leaves Material Symbol names readable if the icon font is unavailable. For offline desktop packaging, vendor the font files under `public/fonts/`, replace the Google `<link>` tags with local `@font-face` rules, and keep the existing system fallback stack as the final fallback.
+
 ## Known Limitations
 
 - Chat is non-streaming and currently supports the OpenAI provider plus explicit demo mode.
-- Monitor cards, debug root-cause text, and some sample chat content remain demo data.
+- Monitor cards and some starter chat content remain demo data.
 - The legacy `/api/apply-fix` endpoint only works in explicit demo mode; real patching uses `/api/patch/proposals` and `/api/patch/apply`.
 - OAuth callbacks are still prototype-only and do not complete a real token exchange.
 - Ollama detection only returns sample localhost models in explicit demo mode.
@@ -107,6 +111,7 @@ The current implementation passes lint, build, audit, backend compile, and backe
 - Backend state is still single-process and not per-user.
 - Static backend serving depends on `dist/` existing.
 - Some OAuth callback URLs are hardcoded to `localhost:8080` while the Vite dev proxy targets backend port `8000`.
+- Frontend browser tests are still future work; the current automated coverage is backend/API focused.
 
 ## Project Docs
 

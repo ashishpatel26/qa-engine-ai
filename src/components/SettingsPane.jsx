@@ -359,13 +359,10 @@ function OAuthProviderCard({ service, connected, user, onSuccess, onDisconnect }
 
   return (
     <div
-      className="rounded-2xl overflow-hidden flex flex-col transition-all duration-300"
+      className="rounded-lg overflow-hidden flex flex-col transition-all duration-300"
       style={{
-        background: 'linear-gradient(160deg, #15171f 0%, #0f1117 100%)',
-        border: `1px solid ${isVerified ? accentBorder : 'rgba(255,255,255,0.08)'}`,
-        boxShadow: isVerified
-          ? `0 0 0 1px ${accentBorder}, 0 8px 32px rgba(0,0,0,0.5)`
-          : '0 4px 24px rgba(0,0,0,0.4)',
+        background: 'var(--color-surface-container)',
+        border: `1px solid ${isVerified ? accentBorder : 'var(--color-outline-variant)'}`,
       }}
     >
       {/* ── Branded gradient header ── */}
@@ -373,22 +370,15 @@ function OAuthProviderCard({ service, connected, user, onSuccess, onDisconnect }
         className="relative px-6 pt-7 pb-6 flex flex-col items-center text-center overflow-hidden"
         style={{ background: `linear-gradient(135deg, ${gradFrom}22 0%, ${gradTo}10 100%)` }}
       >
-        {/* Glow blob */}
-        <div
-          className="absolute -top-10 left-1/2 -translate-x-1/2 w-48 h-24 rounded-full blur-3xl opacity-30 pointer-events-none"
-          style={{ background: gradFrom }}
-        />
-
         {/* Logo circle */}
         <div
-          className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4 relative z-10"
+          className="w-16 h-16 rounded-lg flex items-center justify-center mb-4 relative z-10"
           style={{
             background: isVerified
               ? `linear-gradient(135deg, ${gradFrom}, ${gradTo})`
-              : 'rgba(255,255,255,0.06)',
-            border: `1px solid ${isVerified ? 'transparent' : 'rgba(255,255,255,0.1)'}`,
+              : 'var(--color-surface-bright)',
+            border: `1px solid ${isVerified ? 'transparent' : 'var(--color-outline-variant)'}`,
             color: isVerified ? '#fff' : accentText,
-            boxShadow: isVerified ? `0 4px 20px ${gradFrom}55` : 'none',
           }}
         >
           <Logo size={30} />
@@ -412,7 +402,7 @@ function OAuthProviderCard({ service, connected, user, onSuccess, onDisconnect }
 
             {/* Permission list */}
             <div
-              className="rounded-xl p-4 space-y-3"
+              className="rounded-lg p-4 space-y-3"
               style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}
             >
               <p className="text-[10px] uppercase tracking-widest font-semibold mb-2" style={{ color: 'rgba(255,255,255,0.3)' }}>
@@ -434,7 +424,7 @@ function OAuthProviderCard({ service, connected, user, onSuccess, onDisconnect }
             {/* Error */}
             {error && (
               <div
-                className="flex items-start gap-2 rounded-xl p-3 text-xs"
+                className="flex items-start gap-2 rounded-lg p-3 text-xs"
                 style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: '#f87171' }}
               >
                 <span className="material-symbols-outlined text-[14px] flex-shrink-0 mt-0.5">error_outline</span>
@@ -446,7 +436,7 @@ function OAuthProviderCard({ service, connected, user, onSuccess, onDisconnect }
             <button
               onClick={handleConnect}
               disabled={loading}
-              className="w-full py-3 rounded-xl text-sm font-semibold text-white flex items-center justify-center gap-2.5 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed active:scale-[0.98]"
+              className="w-full py-3 rounded-lg text-sm font-semibold text-white flex items-center justify-center gap-2.5 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed active:scale-[0.98]"
               style={{
                 background: loading
                   ? `${btnBg}88`
@@ -489,7 +479,7 @@ function OAuthProviderCard({ service, connected, user, onSuccess, onDisconnect }
           /* ── Connected state ── */
           <>
             <div
-              className="rounded-xl p-4 space-y-3"
+              className="rounded-lg p-4 space-y-3"
               style={{ background: accentBg, border: `1px solid ${accentBorder}` }}
             >
               <div className="flex items-center gap-2 text-xs font-semibold" style={{ color: accentText }}>
@@ -523,7 +513,7 @@ function OAuthProviderCard({ service, connected, user, onSuccess, onDisconnect }
 
             <button
               onClick={handleDisconnect}
-              className="w-full py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all duration-200 active:scale-[0.98]"
+              className="w-full py-2.5 rounded-lg text-sm font-semibold flex items-center justify-center gap-2 transition-all duration-200 active:scale-[0.98]"
               style={{
                 background: 'rgba(239,68,68,0.08)',
                 border: '1px solid rgba(239,68,68,0.2)',
@@ -836,7 +826,7 @@ export default function SettingsPane({
         : PROVIDER_STATE.DISCONNECTED;
 
   return (
-    <div className="flex-1 overflow-y-auto p-8 flex justify-center bg-surface-container-lowest h-full text-on-surface">
+    <div className="flex-1 overflow-y-auto p-lg md:p-xl flex justify-center bg-background h-full text-on-surface">
       <div className="max-w-4xl w-full flex flex-col space-y-10 pb-20">
 
         {/* Header */}
@@ -879,7 +869,7 @@ export default function SettingsPane({
           </div>
 
           {/* Workspace sync toggle */}
-          <div className="bg-surface-container-low border border-outline-variant rounded-xl p-4 flex items-center justify-between">
+          <div className="bg-surface-container-low border border-outline-variant rounded-lg p-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <span className="material-symbols-outlined text-on-surface-variant">sync</span>
               <div>
@@ -895,7 +885,7 @@ export default function SettingsPane({
         </section>
 
         {/* ── OpenAI API Key ────────────────────────────────────────── */}
-        <section className="bg-surface-container border border-outline-variant rounded-xl overflow-hidden">
+        <section className="bg-surface-container border border-outline-variant rounded-lg overflow-hidden">
           <div className="px-6 py-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-surface-bright flex items-center justify-center text-on-surface">
@@ -1002,7 +992,7 @@ export default function SettingsPane({
         </section>
 
         {/* ── Anthropic API Key ─────────────────────────────────────── */}
-        <section className={`bg-surface-container border border-outline-variant rounded-xl overflow-hidden transition-opacity ${anthropicEnabled ? '' : 'opacity-70'}`}>
+        <section className={`bg-surface-container border border-outline-variant rounded-lg overflow-hidden transition-opacity ${anthropicEnabled ? '' : 'opacity-70'}`}>
           <div className="px-6 py-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-surface-bright flex items-center justify-center text-on-surface">
@@ -1101,7 +1091,7 @@ export default function SettingsPane({
         </section>
 
         {/* ── Ollama ────────────────────────────────────────────────── */}
-        <section className="bg-surface-container border border-outline-variant rounded-xl overflow-hidden">
+        <section className="bg-surface-container border border-outline-variant rounded-lg overflow-hidden">
           <div className="px-6 py-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-surface-bright flex items-center justify-center text-on-surface">
@@ -1150,7 +1140,7 @@ export default function SettingsPane({
               </div>
             </div>
             {detectError && (
-              <div className="flex items-center gap-2 rounded-xl p-3 text-xs" style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: '#f87171' }}>
+              <div className="flex items-center gap-2 rounded-lg p-3 text-xs" style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: '#f87171' }}>
                 <span className="material-symbols-outlined text-[14px]">error_outline</span>
                 <span>{detectError}</span>
               </div>
@@ -1178,13 +1168,13 @@ export default function SettingsPane({
 
         {/* Footer */}
         <div className="flex justify-end gap-3 pt-4 border-t border-outline-variant">
-          <button type="button" className="px-5 py-2.5 text-sm font-semibold text-on-surface bg-surface-container border border-outline-variant rounded-xl hover:bg-surface-container-highest transition-colors">
+          <button type="button" className="px-5 py-2.5 text-sm font-semibold text-on-surface bg-surface-container border border-outline-variant rounded-lg hover:bg-surface-container-highest transition-colors">
             Discard Changes
           </button>
           <button
             type="button"
             onClick={() => alert('Settings apply in memory only for this prototype. Secrets are not persisted.')}
-            className="px-5 py-2.5 text-sm font-semibold text-on-primary bg-primary rounded-xl hover:bg-primary-fixed transition-colors"
+            className="px-5 py-2.5 text-sm font-semibold text-on-primary bg-primary rounded-lg hover:bg-primary-fixed transition-colors"
           >
             Apply Session Settings
           </button>

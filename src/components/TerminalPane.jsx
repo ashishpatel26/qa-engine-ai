@@ -45,9 +45,15 @@ export default function TerminalPane({
           {/* macOS window title */}
           <div className="h-8 bg-[#0F172A] border-b border-[#1E293B] flex items-center px-sm shrink-0">
             <div className="flex space-x-2">
-              <div onClick={() => setActiveView?.('explorer')} className="w-3 h-3 rounded-full bg-error-container cursor-pointer hover:bg-error"></div>
-              <div className="w-3 h-3 rounded-full bg-outline-variant"></div>
-              <div className="w-3 h-3 rounded-full bg-outline-variant"></div>
+              <button
+                type="button"
+                onClick={() => setActiveView?.('explorer')}
+                className="w-3 h-3 rounded-full bg-error-container cursor-pointer hover:bg-error"
+                title="Return to explorer"
+                aria-label="Return to explorer"
+              ></button>
+              <div className="w-3 h-3 rounded-full bg-outline-variant" aria-hidden="true"></div>
+              <div className="w-3 h-3 rounded-full bg-outline-variant" aria-hidden="true"></div>
             </div>
             <div className="flex-1 text-center font-code-sm text-code-sm text-on-surface-variant select-none text-xs">
               user@qa-engine:~/project - terminal session
@@ -129,6 +135,7 @@ v2.4.1-stable | CLI Session Initialized
                 className="bg-transparent border-none text-on-surface font-code-base focus:ring-0 p-0 m-0 w-full pl-2 focus:outline-none text-xs" 
                 type="text" 
                 placeholder="Type command (e.g. qa run tests, clear, help)..."
+                aria-label="Terminal command"
               />
             </div>
             <div ref={logEndRef} />
@@ -143,34 +150,43 @@ v2.4.1-stable | CLI Session Initialized
     <div className={`border-t border-outline-variant bg-surface-container-lowest flex flex-col shrink-0 transition-all duration-150 ${minimized ? 'h-8' : 'h-48'} text-on-surface`}>
       {/* Header bar */}
       <div className="flex items-center justify-between px-md h-8 border-b border-outline-variant bg-surface-container">
-        <div className="flex gap-md font-label-caps text-label-caps uppercase text-on-surface-variant text-[10px] tracking-wider font-bold">
-          <span 
+        <div className="flex gap-md font-label-caps text-label-caps uppercase text-on-surface-variant text-[10px] tracking-wider font-bold" role="tablist" aria-label="Terminal panel sections">
+          <button
+            type="button"
+            role="tab"
             onClick={() => setActivePanelTab('terminal')}
+            aria-selected={activePanelTab === 'terminal'}
             className={`pb-1 mt-1 cursor-pointer ${activePanelTab === 'terminal' ? 'text-primary border-b-2 border-primary' : 'hover:text-on-surface'}`}
           >
             Terminal
-          </span>
-          <span 
+          </button>
+          <button
+            type="button"
+            role="tab"
             onClick={() => setActivePanelTab('problems')}
+            aria-selected={activePanelTab === 'problems'}
             className={`pb-1 mt-1 cursor-pointer ${activePanelTab === 'problems' ? 'text-primary border-b-2 border-primary' : 'hover:text-on-surface'}`}
           >
             Problems 
             {problemTotal > 0 && (
               <span className="bg-error/25 text-error rounded-full px-1.5 ml-1 text-[8px] font-bold">{problemTotal}</span>
             )}
-          </span>
-          <span 
+          </button>
+          <button
+            type="button"
+            role="tab"
             onClick={() => setActivePanelTab('output')}
+            aria-selected={activePanelTab === 'output'}
             className={`pb-1 mt-1 cursor-pointer ${activePanelTab === 'output' ? 'text-primary border-b-2 border-primary' : 'hover:text-on-surface'}`}
           >
             Output
-          </span>
+          </button>
         </div>
         <span className="rounded-sm border border-tertiary/40 bg-tertiary/10 px-1.5 py-[1px] font-label-caps text-[9px] font-bold uppercase tracking-wide text-tertiary">{showDemoIntro ? 'Demo logs' : 'Terminal logs'}</span>
         <div className="flex items-center gap-sm text-on-surface-variant">
-          <button onClick={() => setTerminalLogs?.([])} className="hover:text-on-surface transition-colors p-0.5 rounded" title="Clear console"><span className="material-symbols-outlined text-[14px]">delete</span></button>
-          <button onClick={() => setMinimized(!minimized)} className="hover:text-on-surface transition-colors p-0.5 rounded" title="Minimize"><span className="material-symbols-outlined text-[14px]">{minimized ? 'expand_more' : 'expand_less'}</span></button>
-          <button onClick={() => setTerminalCollapsed?.(true)} className="hover:text-on-surface transition-colors p-0.5 rounded" title="Close"><span className="material-symbols-outlined text-[14px]">close</span></button>
+          <button type="button" onClick={() => setTerminalLogs?.([])} className="hover:text-on-surface transition-colors p-0.5 rounded" title="Clear console" aria-label="Clear console"><span className="material-symbols-outlined text-[14px]" aria-hidden="true">delete</span></button>
+          <button type="button" onClick={() => setMinimized(!minimized)} className="hover:text-on-surface transition-colors p-0.5 rounded" title={minimized ? 'Restore terminal panel' : 'Minimize terminal panel'} aria-label={minimized ? 'Restore terminal panel' : 'Minimize terminal panel'}><span className="material-symbols-outlined text-[14px]" aria-hidden="true">{minimized ? 'expand_more' : 'expand_less'}</span></button>
+          <button type="button" onClick={() => setTerminalCollapsed?.(true)} className="hover:text-on-surface transition-colors p-0.5 rounded" title="Close terminal panel" aria-label="Close terminal panel"><span className="material-symbols-outlined text-[14px]" aria-hidden="true">close</span></button>
         </div>
       </div>
 
@@ -218,6 +234,7 @@ v2.4.1-stable | CLI Session Initialized
                   type="text" 
                   autoComplete="off" 
                   placeholder="Run command..."
+                  aria-label="Terminal command"
                 />
               </div>
             </div>
@@ -226,16 +243,17 @@ v2.4.1-stable | CLI Session Initialized
           {activePanelTab === 'problems' && (
             <div className="space-y-1">
               {problemTotal > 0 ? (
-                <div 
+                <button
+                  type="button"
                   onClick={() => setActiveView?.('debug')}
-                  className="flex items-start space-x-2 text-error p-1 rounded hover:bg-surface-variant/20 cursor-pointer"
+                  className="w-full text-left flex items-start space-x-2 text-error p-1 rounded hover:bg-surface-variant/20 cursor-pointer"
                 >
-                  <span className="material-symbols-outlined text-[16px] mt-0.5">error</span>
+                  <span className="material-symbols-outlined text-[16px] mt-0.5" aria-hidden="true">error</span>
                   <div>
                     <span className="font-bold">[TS2322]</span> Type 'null' is not assignable to type 'Token'. 
                     <span className="text-on-surface-variant font-normal"> - src/auth/AuthSessionManager.ts:142:24</span>
                   </div>
-                </div>
+                </button>
               ) : (
                 <div className="flex items-start space-x-2 text-secondary p-1 rounded">
                   <span className="material-symbols-outlined text-[16px] mt-0.5">check_circle</span>

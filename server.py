@@ -40,10 +40,19 @@ WORKSPACE_CONTEXT_FILE_LIMIT = int(os.getenv("QA_ENGINE_CONTEXT_FILE_LIMIT", "5"
 WORKSPACE_EXCLUDED_NAMES = {
     ".git",
     ".venv",
+    ".env",
+    ".agents",
+    ".codegraph",
+    ".codex",
+    ".cursor",
+    ".pytest_cache",
+    ".remember",
+    ".qa_engine",
     "__pycache__",
     "dist",
     "node_modules",
 }
+WORKSPACE_ALLOWED_DOTFILES = {".gitignore"}
 OPENAI_CHAT_URL = "https://api.openai.com/v1/chat/completions"
 OPENAI_MODELS_URL = "https://api.openai.com/v1/models"
 OPENAI_TIMEOUT_SECONDS = float(os.getenv("QA_ENGINE_OPENAI_TIMEOUT_SECONDS", "30"))
@@ -881,6 +890,8 @@ def list_workspace_files(path: str = "."):
     )
     for child in children:
         if child.name in WORKSPACE_EXCLUDED_NAMES:
+            continue
+        if child.name.startswith(".") and child.name not in WORKSPACE_ALLOWED_DOTFILES:
             continue
         root = _effective_workspace_root()
         try:

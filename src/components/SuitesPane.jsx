@@ -333,12 +333,12 @@ export default function SuitesPane({
   };
 
   return (
-    <div className="flex-1 overflow-y-auto p-lg bg-background h-full">
-      <div className="max-w-[1400px] mx-auto flex flex-col gap-lg">
+    <div className="flex-1 overflow-y-auto p-sm sm:p-md lg:p-lg bg-background h-full">
+      <div className="max-w-[1400px] w-full min-w-0 mx-auto flex flex-col gap-lg">
         {/* Page Header */}
-        <div className="flex justify-between items-end shrink-0 text-on-surface">
-          <div>
-            <div className="flex items-center gap-sm mb-xs">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-sm shrink-0 text-on-surface">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-sm mb-xs min-w-0">
               <h2 className="font-headline-lg text-headline-lg">Test Suites Overview</h2>
               {isUsingSampleData && (
                 <span className="rounded-sm border border-tertiary/40 bg-tertiary/10 px-1.5 py-[1px] font-label-caps text-[9px] font-bold uppercase tracking-wide text-tertiary">Sample data</span>
@@ -351,7 +351,7 @@ export default function SuitesPane({
         {/* Bento Grid Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-md">
           {/* Total Tests */}
-          <div className="bg-surface-container border border-outline-variant rounded-lg p-md flex flex-col justify-between h-32 relative overflow-hidden group">
+          <div className="bg-surface-container border border-outline-variant rounded-lg p-md flex flex-col justify-between min-h-32 relative overflow-hidden group">
             <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
             <div className="flex justify-between items-start">
               <span className="font-label-caps text-label-caps text-on-surface-variant uppercase text-xs">Total Tests</span>
@@ -361,25 +361,25 @@ export default function SuitesPane({
           </div>
           
           {/* Passing Rate */}
-          <div className="bg-surface-container border border-outline-variant rounded-lg p-md flex flex-col justify-between h-32 relative overflow-hidden">
+          <div className="bg-surface-container border border-outline-variant rounded-lg p-md flex flex-col justify-between min-h-32 relative overflow-hidden">
             <div className={`absolute top-0 left-0 w-full h-1 ${fixApplied || !isUsingSampleData ? 'bg-secondary' : 'bg-tertiary'} opacity-50`}></div>
             <div className="flex justify-between items-start">
               <span className={`font-label-caps text-label-caps uppercase text-xs ${fixApplied || !isUsingSampleData ? 'text-secondary' : 'text-tertiary'}`}>Passing Rate</span>
               <span className={`material-symbols-outlined text-sm ${fixApplied || !isUsingSampleData ? 'text-secondary' : 'text-tertiary'}`}>{fixApplied || !isUsingSampleData ? 'check_circle' : 'pending'}</span>
             </div>
-            <div className="flex items-end gap-sm">
+            <div className="flex flex-wrap items-end gap-sm">
               <div className={`font-code-base text-[32px] leading-none ${fixApplied || !isUsingSampleData ? 'text-secondary' : 'text-tertiary'}`}>{summary.passingRate}</div>
               <div className={`font-body-sm text-body-sm mb-1 ${isUsingSampleData ? 'text-secondary-fixed-dim' : 'text-on-surface-variant'}`}>{summary.passingSubtitle}</div>
             </div>
           </div>
           
           {/* Total Coverage */}
-          <div className="bg-surface-container border border-outline-variant rounded-lg p-md flex flex-col justify-between h-32">
+          <div className="bg-surface-container border border-outline-variant rounded-lg p-md flex flex-col justify-between min-h-32">
             <div className="flex justify-between items-start">
               <span className="font-label-caps text-label-caps text-primary uppercase text-xs">Total Coverage</span>
               <span className="material-symbols-outlined text-primary text-sm">radar</span>
             </div>
-            <div className="flex items-end gap-sm">
+            <div className="flex flex-wrap items-end gap-sm">
               <div className="font-code-base text-[32px] leading-none text-primary">{summary.coverage}</div>
               <div className="font-body-sm text-body-sm text-on-surface-variant mb-1">{summary.coverageSubtitle}</div>
             </div>
@@ -389,7 +389,7 @@ export default function SuitesPane({
           </div>
           
           {/* Recent Failures */}
-          <div className={`bg-surface-container border rounded-lg p-md flex flex-col justify-between h-32 relative ${fixApplied || (!isUsingSampleData && summary.recentFailures === '0') ? 'border-outline-variant' : 'border-error-container'}`}>
+          <div className={`bg-surface-container border rounded-lg p-md flex flex-col justify-between min-h-32 relative overflow-hidden ${fixApplied || (!isUsingSampleData && summary.recentFailures === '0') ? 'border-outline-variant' : 'border-error-container'}`}>
             <div className="absolute right-0 bottom-0 opacity-10">
               <span className="material-symbols-outlined text-9xl text-error">warning</span>
             </div>
@@ -397,7 +397,7 @@ export default function SuitesPane({
               <span className={`font-label-caps text-label-caps uppercase text-xs ${fixApplied || (!isUsingSampleData && summary.recentFailures === '0') ? 'text-on-surface-variant' : 'text-error'}`}>Recent Failures</span>
               <span className={`material-symbols-outlined text-sm ${fixApplied || (!isUsingSampleData && summary.recentFailures === '0') ? 'text-on-surface-variant' : 'text-error'}`}>bug_report</span>
             </div>
-            <div className="flex items-end gap-sm z-10">
+            <div className="flex flex-wrap items-end gap-sm z-10">
               <div className={`font-code-base text-[32px] leading-none ${fixApplied || (!isUsingSampleData && summary.recentFailures === '0') ? 'text-on-surface' : 'text-error'}`}>{summary.recentFailures}</div>
               <div className="font-body-sm text-body-sm text-on-surface-variant mb-1">{summary.failuresSubtitle}</div>
             </div>
@@ -405,10 +405,10 @@ export default function SuitesPane({
         </div>
 
         {/* Main Data Table */}
-        <div className="bg-surface-container border border-outline-variant rounded-lg flex flex-col flex-1 min-h-[400px]">
+        <div className="bg-surface-container border border-outline-variant rounded-lg flex flex-col flex-1 min-h-[400px] min-w-0 overflow-hidden">
           {/* Table Toolbar */}
-          <div className="px-md py-sm border-b border-outline-variant flex justify-between items-center bg-surface-bright/30 text-on-surface">
-            <div className="flex gap-sm">
+          <div className="px-sm sm:px-md py-sm border-b border-outline-variant flex flex-col sm:flex-row sm:justify-between sm:items-center gap-sm bg-surface-bright/30 text-on-surface">
+            <div className="flex flex-wrap gap-sm">
               <button className="font-label-caps text-label-caps text-on-surface bg-surface-variant px-3 py-1.5 rounded flex items-center gap-xs text-xs">
                 <span className="material-symbols-outlined text-[14px]">filter_list</span> Filter
               </button>
@@ -420,7 +420,7 @@ export default function SuitesPane({
           </div>
           
           {/* Table Header */}
-          <div className="grid grid-cols-12 gap-sm px-md py-sm border-b border-outline-variant font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider bg-surface-container-low text-xs">
+          <div className="hidden lg:grid grid-cols-12 gap-sm px-md py-sm border-b border-outline-variant font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider bg-surface-container-low text-xs">
             <div className="col-span-4">Suite Name</div>
             <div className="col-span-2">Status</div>
             <div className="col-span-2">Framework</div>
@@ -444,26 +444,35 @@ export default function SuitesPane({
                   <div
                     key={suite.id}
                     onClick={() => handleRowClick(suite)}
-                    className={`grid grid-cols-12 gap-sm px-md py-md ${isLast ? '' : 'border-b border-outline-variant'} hover:bg-surface-variant/30 transition-colors items-center group cursor-pointer ${suite.statusKey === 'failing' ? 'bg-error-container/5' : ''}`}
+                    className={`grid grid-cols-2 lg:grid-cols-12 gap-x-md gap-y-sm px-sm sm:px-md py-md ${isLast ? '' : 'border-b border-outline-variant'} hover:bg-surface-variant/30 transition-colors items-start lg:items-center group cursor-pointer ${suite.statusKey === 'failing' ? 'bg-error-container/5' : ''}`}
                   >
-                    <div className="col-span-4 flex items-center gap-sm">
-                      <span className="material-symbols-outlined text-outline text-sm">{suite.icon}</span>
-                      <span className="font-code-sm text-code-sm text-on-surface font-semibold">{suite.name}</span>
+                    <div className="col-span-2 lg:col-span-4 flex items-center gap-sm min-w-0">
+                      <span className="material-symbols-outlined text-outline text-sm shrink-0">{suite.icon}</span>
+                      <span className="font-code-sm text-code-sm text-on-surface font-semibold truncate">{suite.name}</span>
                     </div>
-                    <div className="col-span-2 flex items-center gap-xs">
-                      <div className={`w-2 h-2 rounded-full ${statusMeta.dot}`}></div>
-                      <span className={statusMeta.text}>{suite.statusLabel}</span>
+                    <div className="col-span-1 lg:col-span-2 flex items-center gap-xs min-w-0">
+                      <span className="lg:hidden font-label-caps text-[9px] uppercase text-on-surface-variant shrink-0">Status</span>
+                      <div className={`w-2 h-2 rounded-full shrink-0 ${statusMeta.dot}`}></div>
+                      <span className={`${statusMeta.text} truncate`}>{suite.statusLabel}</span>
                     </div>
-                    <div className="col-span-2 flex items-center gap-xs text-on-surface-variant">
-                      <span className="material-symbols-outlined text-sm">{inferIcon({}, suite.framework)}</span> {suite.framework}
+                    <div className="col-span-1 lg:col-span-2 flex items-center gap-xs text-on-surface-variant min-w-0">
+                      <span className="lg:hidden font-label-caps text-[9px] uppercase text-on-surface-variant shrink-0">Runner</span>
+                      <span className="material-symbols-outlined text-sm shrink-0">{inferIcon({}, suite.framework)}</span>
+                      <span className="truncate">{suite.framework}</span>
                     </div>
-                    <div className="col-span-2 text-right font-code-sm text-code-sm text-on-surface">{formatPercent(suite.coverage)}</div>
-                    <div className="col-span-1 text-right text-on-surface-variant">{suite.lastRun}</div>
-                    <div className="col-span-1 flex justify-center">
+                    <div className="col-span-1 lg:col-span-2 text-left lg:text-right font-code-sm text-code-sm text-on-surface">
+                      <span className="lg:hidden font-label-caps text-[9px] uppercase text-on-surface-variant mr-xs">Coverage</span>
+                      {formatPercent(suite.coverage)}
+                    </div>
+                    <div className="col-span-1 lg:col-span-1 text-left lg:text-right text-on-surface-variant">
+                      <span className="lg:hidden font-label-caps text-[9px] uppercase text-on-surface-variant mr-xs">Last</span>
+                      {suite.lastRun}
+                    </div>
+                    <div className="col-span-2 lg:col-span-1 flex justify-end lg:justify-center">
                       <button
                         onClick={(e) => handlePlayClick(e, suite)}
                         disabled={!canRun}
-                        className={`opacity-0 group-hover:opacity-100 bg-surface-variant text-on-surface w-6 h-6 rounded flex items-center justify-center transition-all ${canRun ? 'hover:bg-primary-container hover:text-on-primary-container' : 'cursor-not-allowed opacity-40'}`}
+                        className={`opacity-100 lg:opacity-0 lg:group-hover:opacity-100 bg-surface-variant text-on-surface w-8 h-8 lg:w-6 lg:h-6 rounded flex items-center justify-center transition-all ${canRun ? 'hover:bg-primary-container hover:text-on-primary-container' : 'cursor-not-allowed opacity-40'}`}
                         title={isRunning ? 'Run in progress' : 'Run suite'}
                       >
                         <span className="material-symbols-outlined text-[14px]">{isRunning ? 'hourglass_top' : 'play_arrow'}</span>

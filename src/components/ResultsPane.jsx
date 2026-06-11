@@ -135,20 +135,20 @@ function LiveRunResults({ run, setActiveView }) {
   ];
 
   return (
-    <div className="flex-1 overflow-hidden flex flex-col p-lg gap-lg bg-[#020617] h-full">
+    <div className="flex-1 overflow-y-auto lg:overflow-hidden flex flex-col p-sm sm:p-md lg:p-lg gap-md lg:gap-lg bg-[#020617] h-full">
       {/* Run Header */}
-      <div className="flex items-center justify-between shrink-0 text-on-surface">
-        <div className="flex items-center gap-md min-w-0">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-md shrink-0 text-on-surface">
+        <div className="flex items-center gap-md min-w-0 w-full lg:w-auto">
           <div
             onClick={() => setActiveView('suites')}
-            className="bg-surface-container p-sm rounded border border-outline-variant flex items-center justify-center cursor-pointer hover:border-primary transition-colors"
+            className="bg-surface-container p-sm rounded border border-outline-variant flex items-center justify-center cursor-pointer hover:border-primary transition-colors shrink-0"
             title="Back to Test Suites"
           >
             <span className="material-symbols-outlined text-primary text-[24px]">chevron_left</span>
           </div>
-          <div className="min-w-0">
-            <div className="flex items-center gap-sm min-w-0">
-              <h2 className="font-headline-lg text-headline-lg tracking-tight truncate">{normalized.title}</h2>
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-sm min-w-0">
+              <h2 className="font-headline-lg text-headline-lg tracking-tight truncate min-w-0 max-w-full">{normalized.title}</h2>
               <span className={`${normalized.statusMeta.bg} ${normalized.statusMeta.text} ${normalized.statusMeta.border} border px-xs py-[2px] rounded-sm font-label-caps text-label-caps flex items-center gap-[2px] text-xs font-bold uppercase shrink-0`}>
                 <span className="material-symbols-outlined text-[12px]">{normalized.statusMeta.icon}</span>
                 <span>{normalized.statusMeta.label}</span>
@@ -160,18 +160,18 @@ function LiveRunResults({ run, setActiveView }) {
           </div>
         </div>
 
-        <div className="flex gap-md text-right">
-          <div className="flex flex-col items-end">
+        <div className="flex flex-wrap gap-md text-left sm:text-right w-full lg:w-auto">
+          <div className="flex min-w-[72px] flex-col items-start sm:items-end">
             <span className="font-label-caps text-label-caps text-on-surface-variant uppercase text-[10px]">Status</span>
             <span className={`font-headline-md text-headline-md ${normalized.statusMeta.text}`}>{normalized.statusMeta.label}</span>
           </div>
-          <div className="w-px h-full bg-outline-variant"></div>
-          <div className="flex flex-col items-end">
+          <div className="hidden sm:block w-px self-stretch min-h-8 bg-outline-variant"></div>
+          <div className="flex min-w-[72px] flex-col items-start sm:items-end">
             <span className="font-label-caps text-label-caps text-on-surface-variant uppercase text-[10px]">Exit Code</span>
             <span className={`font-headline-md text-headline-md ${normalized.statusKey === 'failed' ? 'text-error' : 'text-on-surface'}`}>{normalized.exitCodeLabel}</span>
           </div>
-          <div className="w-px h-full bg-outline-variant"></div>
-          <div className="flex flex-col items-end">
+          <div className="hidden sm:block w-px self-stretch min-h-8 bg-outline-variant"></div>
+          <div className="flex min-w-[72px] flex-col items-start sm:items-end">
             <span className="font-label-caps text-label-caps text-on-surface-variant uppercase text-[10px]">Duration</span>
             <span className="font-headline-md text-headline-md text-on-surface">{normalized.duration}</span>
           </div>
@@ -179,18 +179,18 @@ function LiveRunResults({ run, setActiveView }) {
       </div>
 
       {/* Main Grid content */}
-      <div className="flex-1 grid grid-cols-12 gap-gutter bg-outline-variant rounded-lg overflow-hidden border border-outline-variant min-h-0">
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-gutter bg-outline-variant rounded-lg overflow-hidden border border-outline-variant min-h-[420px] lg:min-h-0">
         {/* Left Side: Logs */}
-        <div className="col-span-8 bg-surface-container flex flex-col overflow-hidden h-full">
-          <div className="h-10 border-b border-outline-variant flex items-center px-md justify-between bg-surface-container-high shrink-0 text-xs">
+        <div className="lg:col-span-8 bg-surface-container flex flex-col overflow-hidden min-h-[240px] lg:min-h-0 lg:h-full">
+          <div className="min-h-10 border-b border-outline-variant flex items-center px-sm sm:px-md py-xs justify-between bg-surface-container-high shrink-0 text-xs gap-sm">
             <span className="font-body-sm text-body-sm font-medium text-on-surface">Execution Log</span>
             <span className="font-code-sm text-code-sm text-on-surface-variant">{normalized.idLabel || 'Latest'}</span>
           </div>
-          <div className="flex-1 overflow-y-auto p-md flex flex-col gap-sm">
+          <div className="flex-1 overflow-y-auto p-sm sm:p-md flex flex-col gap-sm">
             <div className="flex items-start gap-md group hover:bg-surface-variant/30 p-sm rounded border border-transparent hover:border-outline-variant transition-all">
               <span className="material-symbols-outlined text-primary text-[18px] mt-[2px]">terminal</span>
               <div className="flex-1 min-w-0">
-                <div className="flex justify-between items-center text-xs gap-md">
+                <div className="flex justify-between items-center text-xs gap-md min-w-0">
                   <span className="font-code-sm text-code-sm text-on-surface font-semibold">command</span>
                   <span className="font-code-sm text-code-sm text-on-surface-variant shrink-0">{normalized.startedAt}</span>
                 </div>
@@ -208,7 +208,7 @@ function LiveRunResults({ run, setActiveView }) {
                 <div key={block.label} className="bg-surface p-sm rounded border border-outline-variant/50 font-code-sm text-code-sm overflow-x-auto text-xs">
                   <div className="font-label-caps text-label-caps uppercase text-on-surface-variant mb-xs">{block.label}</div>
                   {splitOutput(block.text).map((line, index) => (
-                    <div key={`${block.label}-${index}`} className={block.color}>{line || ' '}</div>
+                    <div key={`${block.label}-${index}`} className={`${block.color} whitespace-pre-wrap break-words`}>{line || ' '}</div>
                   ))}
                 </div>
               ))
@@ -217,12 +217,12 @@ function LiveRunResults({ run, setActiveView }) {
         </div>
 
         {/* Right Side: Run Details */}
-        <div className="col-span-4 bg-surface-container flex flex-col overflow-hidden h-full">
-          <div className="h-10 border-b border-outline-variant flex items-center px-md justify-between bg-surface-container-high shrink-0 text-xs">
+        <div className="lg:col-span-4 bg-surface-container flex flex-col overflow-hidden min-h-[180px] lg:min-h-0 lg:h-full">
+          <div className="min-h-10 border-b border-outline-variant flex items-center px-sm sm:px-md py-xs justify-between bg-surface-container-high shrink-0 text-xs gap-sm">
             <span className="font-body-sm text-body-sm font-medium text-on-surface">Run Details</span>
             <span className={`${normalized.statusMeta.bg} ${normalized.statusMeta.text} font-code-sm text-code-sm px-xs rounded`}>Exit: {normalized.exitCodeLabel}</span>
           </div>
-          <div className="flex-1 overflow-y-auto p-md">
+          <div className="flex-1 overflow-y-auto p-sm sm:p-md">
             <div className="flex flex-col gap-sm text-xs">
               {details.map(([label, value]) => (
                 <div key={label} className="border-b border-outline-variant/50 pb-sm last:border-b-0">
@@ -268,44 +268,44 @@ export default function ResultsPane({ fixApplied, setActiveView, latestRun, run 
   }
 
   return (
-    <div className="flex-1 overflow-hidden flex flex-col p-lg gap-lg bg-[#020617] h-full">
+    <div className="flex-1 overflow-y-auto lg:overflow-hidden flex flex-col p-sm sm:p-md lg:p-lg gap-md lg:gap-lg bg-[#020617] h-full">
       {/* Run Header */}
-      <div className="flex items-center justify-between shrink-0 text-on-surface">
-        <div className="flex items-center gap-md">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-md shrink-0 text-on-surface">
+        <div className="flex items-center gap-md min-w-0 w-full lg:w-auto">
           <div 
             onClick={() => setActiveView('suites')}
-            className="bg-surface-container p-sm rounded border border-outline-variant flex items-center justify-center cursor-pointer hover:border-primary transition-colors"
+            className="bg-surface-container p-sm rounded border border-outline-variant flex items-center justify-center cursor-pointer hover:border-primary transition-colors shrink-0"
             title="Back to Test Suites"
           >
             <span className="material-symbols-outlined text-primary text-[24px]">chevron_left</span>
           </div>
-          <div>
-            <div className="flex items-center gap-sm">
-              <h2 className="font-headline-lg text-headline-lg tracking-tight">Run #482 - Core API - Unit</h2>
-              <span className="bg-tertiary/10 text-tertiary border border-tertiary/40 px-xs py-[2px] rounded-sm font-label-caps text-label-caps text-xs font-bold uppercase">
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-sm min-w-0">
+              <h2 className="font-headline-lg text-headline-lg tracking-tight truncate min-w-0 max-w-full">Run #482 - Core API - Unit</h2>
+              <span className="bg-tertiary/10 text-tertiary border border-tertiary/40 px-xs py-[2px] rounded-sm font-label-caps text-label-caps text-xs font-bold uppercase shrink-0">
                 Sample run
               </span>
-              <span className={`bg-secondary-container/20 text-secondary border border-secondary/30 px-xs py-[2px] rounded-sm font-label-caps text-label-caps flex items-center gap-[2px] text-xs font-bold`}>
+              <span className={`bg-secondary-container/20 text-secondary border border-secondary/30 px-xs py-[2px] rounded-sm font-label-caps text-label-caps flex items-center gap-[2px] text-xs font-bold shrink-0`}>
                 <span className="material-symbols-outlined text-[12px]">check_circle</span>
                 <span>COMPLETED</span>
               </span>
             </div>
-            <p className="font-body-sm text-body-sm text-on-surface-variant mt-unit text-xs">Executed by <span className="text-on-surface">CI Runner</span> • Started 14 mins ago • Duration: 2m 14s</p>
+            <p className="font-body-sm text-body-sm text-on-surface-variant mt-unit text-xs truncate">Executed by <span className="text-on-surface">CI Runner</span> • Started 14 mins ago • Duration: 2m 14s</p>
           </div>
         </div>
         
-        <div className="flex gap-md text-right">
-          <div className="flex flex-col items-end">
+        <div className="flex flex-wrap gap-md text-left sm:text-right w-full lg:w-auto">
+          <div className="flex min-w-[72px] flex-col items-start sm:items-end">
             <span className="font-label-caps text-label-caps text-on-surface-variant uppercase text-[10px]">Pass Rate</span>
             <span className="font-headline-md text-headline-md text-secondary">{fixApplied ? '100%' : '98.2%'}</span>
           </div>
-          <div className="w-px h-full bg-outline-variant"></div>
-          <div className="flex flex-col items-end">
+          <div className="hidden sm:block w-px self-stretch min-h-8 bg-outline-variant"></div>
+          <div className="flex min-w-[72px] flex-col items-start sm:items-end">
             <span className="font-label-caps text-label-caps text-on-surface-variant uppercase text-[10px]">Tests</span>
             <span className="font-headline-md text-headline-md text-on-surface">1,042</span>
           </div>
-          <div className="w-px h-full bg-outline-variant"></div>
-          <div className="flex flex-col items-end">
+          <div className="hidden sm:block w-px self-stretch min-h-8 bg-outline-variant"></div>
+          <div className="flex min-w-[72px] flex-col items-start sm:items-end">
             <span className="font-label-caps text-label-caps text-on-surface-variant uppercase text-[10px]">Failed</span>
             <span className={`font-headline-md text-headline-md ${fixApplied ? 'text-on-surface' : 'text-error'}`}>{fixApplied ? '0' : '3'}</span>
           </div>
@@ -313,24 +313,24 @@ export default function ResultsPane({ fixApplied, setActiveView, latestRun, run 
       </div>
 
       {/* Main Grid content */}
-      <div className="flex-1 grid grid-cols-12 gap-gutter bg-outline-variant rounded-lg overflow-hidden border border-outline-variant min-h-0">
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-gutter bg-outline-variant rounded-lg overflow-hidden border border-outline-variant min-h-[420px] lg:min-h-0">
         
         {/* Left Side: Logs */}
-        <div className="col-span-8 bg-surface-container flex flex-col overflow-hidden h-full">
-          <div className="h-10 border-b border-outline-variant flex items-center px-md justify-between bg-surface-container-high shrink-0 text-xs">
+        <div className="lg:col-span-8 bg-surface-container flex flex-col overflow-hidden min-h-[240px] lg:min-h-0 lg:h-full">
+          <div className="min-h-10 border-b border-outline-variant flex flex-wrap items-center px-sm sm:px-md py-xs justify-between bg-surface-container-high shrink-0 text-xs gap-sm">
             <span className="font-body-sm text-body-sm font-medium text-on-surface">Execution Log</span>
-            <div className="flex items-center gap-sm">
+            <div className="flex flex-wrap items-center gap-sm">
               <button className="text-on-surface-variant hover:text-on-surface font-body-sm text-body-sm flex items-center gap-xs"><span className="material-symbols-outlined text-[14px]">filter_list</span> Filter</button>
               <button className="text-error hover:text-error-container font-body-sm text-body-sm flex items-center gap-xs"><span className="material-symbols-outlined text-[14px]">error</span> Failures Only</button>
             </div>
           </div>
-          <div className="flex-1 overflow-y-auto p-md flex flex-col gap-sm">
+          <div className="flex-1 overflow-y-auto p-sm sm:p-md flex flex-col gap-sm">
             <div className="flex items-start gap-md group hover:bg-surface-variant/30 p-sm rounded border border-transparent hover:border-outline-variant transition-all cursor-pointer">
               <span className="material-symbols-outlined text-secondary text-[18px] mt-[2px]">check_circle</span>
-              <div className="flex-1">
-                <div className="flex justify-between items-center text-xs">
-                  <span className="font-code-sm text-code-sm text-on-surface font-semibold">auth.service.spec.ts</span>
-                  <span className="font-code-sm text-code-sm text-on-surface-variant">42ms</span>
+              <div className="flex-1 min-w-0">
+                <div className="flex justify-between items-center text-xs gap-md min-w-0">
+                  <span className="font-code-sm text-code-sm text-on-surface font-semibold truncate">auth.service.spec.ts</span>
+                  <span className="font-code-sm text-code-sm text-on-surface-variant shrink-0">42ms</span>
                 </div>
                 <span className="font-body-sm text-body-sm text-on-surface-variant block mt-unit text-xs">should successfully authenticate valid user credentials</span>
               </div>
@@ -338,10 +338,10 @@ export default function ResultsPane({ fixApplied, setActiveView, latestRun, run 
 
             <div className="flex items-start gap-md group hover:bg-surface-variant/30 p-sm rounded border border-transparent hover:border-outline-variant transition-all cursor-pointer">
               <span className="material-symbols-outlined text-secondary text-[18px] mt-[2px]">check_circle</span>
-              <div className="flex-1">
-                <div className="flex justify-between items-center text-xs">
-                  <span className="font-code-sm text-code-sm text-on-surface font-semibold">auth.service.spec.ts</span>
-                  <span className="font-code-sm text-code-sm text-on-surface-variant">18ms</span>
+              <div className="flex-1 min-w-0">
+                <div className="flex justify-between items-center text-xs gap-md min-w-0">
+                  <span className="font-code-sm text-code-sm text-on-surface font-semibold truncate">auth.service.spec.ts</span>
+                  <span className="font-code-sm text-code-sm text-on-surface-variant shrink-0">18ms</span>
                 </div>
                 <span className="font-body-sm text-body-sm text-on-surface-variant block mt-unit text-xs">should throw error on invalid password</span>
               </div>
@@ -354,10 +354,10 @@ export default function ResultsPane({ fixApplied, setActiveView, latestRun, run 
               >
                 <div className="absolute left-0 top-0 w-[2px] h-full bg-error rounded-l"></div>
                 <span className="material-symbols-outlined text-error text-[18px] mt-[2px]">cancel</span>
-                <div className="flex-1">
-                  <div className="flex justify-between items-center text-xs">
-                    <span className="font-code-sm text-code-sm text-error font-semibold">user.controller.spec.ts</span>
-                    <span className="font-code-sm text-code-sm text-on-surface-variant">124ms</span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex justify-between items-center text-xs gap-md min-w-0">
+                    <span className="font-code-sm text-code-sm text-error font-semibold truncate">user.controller.spec.ts</span>
+                    <span className="font-code-sm text-code-sm text-on-surface-variant shrink-0">124ms</span>
                   </div>
                   <span className="font-body-sm text-body-sm text-on-surface block mt-unit text-xs">should return 404 when requesting non-existent user profile</span>
                   <div className="mt-sm bg-surface p-sm rounded border border-outline-variant/50 font-code-sm text-code-sm overflow-x-auto text-on-surface-variant text-xs">
@@ -370,10 +370,10 @@ export default function ResultsPane({ fixApplied, setActiveView, latestRun, run 
             ) : (
               <div className="flex items-start gap-md group hover:bg-surface-variant/30 p-sm rounded border border-transparent hover:border-outline-variant transition-all cursor-pointer">
                 <span className="material-symbols-outlined text-secondary text-[18px] mt-[2px]">check_circle</span>
-                <div className="flex-1">
-                  <div className="flex justify-between items-center text-xs">
-                    <span className="font-code-sm text-code-sm text-on-surface font-semibold">user.controller.spec.ts</span>
-                    <span className="font-code-sm text-code-sm text-on-surface-variant">108ms</span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex justify-between items-center text-xs gap-md min-w-0">
+                    <span className="font-code-sm text-code-sm text-on-surface font-semibold truncate">user.controller.spec.ts</span>
+                    <span className="font-code-sm text-code-sm text-on-surface-variant shrink-0">108ms</span>
                   </div>
                   <span className="font-body-sm text-body-sm text-on-surface-variant block mt-unit text-xs">should return 404 when requesting non-existent user profile</span>
                 </div>
@@ -383,8 +383,8 @@ export default function ResultsPane({ fixApplied, setActiveView, latestRun, run 
         </div>
 
         {/* Right Side: Coverage */}
-        <div className="col-span-4 bg-surface-container flex flex-col overflow-hidden h-full">
-          <div className="h-10 border-b border-outline-variant flex items-center px-md justify-between bg-surface-container-high shrink-0 text-xs">
+        <div className="lg:col-span-4 bg-surface-container flex flex-col overflow-hidden min-h-[180px] lg:min-h-0 lg:h-full">
+          <div className="min-h-10 border-b border-outline-variant flex items-center px-sm sm:px-md py-xs justify-between bg-surface-container-high shrink-0 text-xs gap-sm">
             <span className="font-body-sm text-body-sm font-medium text-on-surface">Coverage Analytics</span>
             <span className="font-code-sm text-code-sm text-secondary bg-secondary-container/20 px-xs rounded">Total: 84%</span>
           </div>
@@ -396,11 +396,11 @@ export default function ResultsPane({ fixApplied, setActiveView, latestRun, run 
                   <span className="text-on-surface flex-1">src/controllers/</span>
                   <span className="text-on-surface-variant text-[10px]">88%</span>
                 </div>
-                <div className="flex flex-col ml-xl pl-unit border-l border-outline-variant/30 mt-unit gap-unit">
+                <div className="flex flex-col ml-md sm:ml-xl pl-unit border-l border-outline-variant/30 mt-unit gap-unit min-w-0">
                   <div className="flex items-center gap-xs px-sm py-unit hover:bg-surface-variant rounded">
                     <span className="material-symbols-outlined text-[14px] text-primary">description</span>
-                    <span className="text-on-surface-variant flex-1">auth.ts</span>
-                    <div className="flex items-center gap-sm w-24">
+                    <span className="text-on-surface-variant flex-1 min-w-0 truncate">auth.ts</span>
+                    <div className="flex items-center gap-sm w-20 sm:w-24 shrink-0">
                       <div className="h-1 flex-1 bg-surface-container-highest rounded-full overflow-hidden">
                         <div className="h-full bg-secondary" style={{ width: '92%' }}></div>
                       </div>
@@ -409,8 +409,8 @@ export default function ResultsPane({ fixApplied, setActiveView, latestRun, run 
                   </div>
                   <div className="flex items-center gap-xs px-sm py-unit hover:bg-surface-variant rounded bg-surface-variant/50 border border-outline-variant/50">
                     <span className="material-symbols-outlined text-[14px] text-primary">description</span>
-                    <span className="text-on-surface flex-1">user.ts</span>
-                    <div className="flex items-center gap-sm w-24">
+                    <span className="text-on-surface flex-1 min-w-0 truncate">user.ts</span>
+                    <div className="flex items-center gap-sm w-20 sm:w-24 shrink-0">
                       <div className="h-1 flex-1 bg-surface-container-highest rounded-full overflow-hidden">
                         <div className="h-full bg-tertiary" style={{ width: '74%' }}></div>
                       </div>
@@ -439,7 +439,7 @@ export default function ResultsPane({ fixApplied, setActiveView, latestRun, run 
               <span>UNCOVERED LINES</span>
             </span>
           </div>
-          <table className="w-full text-left border-collapse">
+          <table className="min-w-[520px] w-full text-left border-collapse">
             <tbody>
               <tr className="hover:bg-surface-variant/30">
                 <td className="w-12 text-right pr-md text-outline select-none border-r border-outline-variant/50">42</td>

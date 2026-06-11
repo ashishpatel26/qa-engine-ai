@@ -194,6 +194,8 @@ def test_workspace_file_listing_is_root_allowlisted(client, monkeypatch, tmp_pat
     (tmp_path / "src").mkdir()
     (tmp_path / "src" / "app.py").write_text("print('ok')", encoding="utf-8")
     (tmp_path / ".git").mkdir()
+    (tmp_path / ".env").write_text("SECRET=1", encoding="utf-8")
+    (tmp_path / ".gitignore").write_text("node_modules\n", encoding="utf-8")
     monkeypatch.setattr(server, "PROJECT_ROOT", tmp_path.resolve())
 
     response = client.get("/api/workspace/files", params={"path": "."})
@@ -202,7 +204,10 @@ def test_workspace_file_listing_is_root_allowlisted(client, monkeypatch, tmp_pat
     data = response.json()
     assert data["path"] == "."
     assert {"name": "src", "path": "src", "type": "directory"} in data["entries"]
-    assert all(entry["name"] != ".git" for entry in data["entries"])
+    names = {entry["name"] for entry in data["entries"]}
+    assert ".git" not in names
+    assert ".env" not in names
+    assert ".gitignore" in names
 
     escape = client.get("/api/workspace/files", params={"path": "../"})
     assert escape.status_code == 400

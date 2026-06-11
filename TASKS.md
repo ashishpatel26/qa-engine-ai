@@ -16,7 +16,7 @@ Status legend: `[ ]` todo, `[~]` in progress, `[x]` done.
 | M0-04 | [x] Replace invalid JSX attributes: `class` to `className`, `autocomplete` to `autoComplete`. | P0 | Frontend | None | No React warnings for invalid DOM props in primary views. |
 | M0-05 | [x] Replace `ChatPane` direct DOM mutation with React state for patch apply loading/success/error. | P1 | Frontend | M0-03 | No use of `innerHTML` or imperative `className` mutation for patch button state. |
 | M0-06 | [x] Fix favicon path from `/vite.svg` to `/favicon.svg` and remove unused starter assets if not needed. | P2 | Frontend | None | Browser tab shows QA Engine favicon. |
-| M0-07 | [ ] Clean dependency tree by pruning extraneous packages and verifying lockfile consistency. | P2 | Tooling | None | `cmd.exe /C npm ls --depth=0` reports no extraneous packages. Still open: `npm install` and `npm prune` completed, but npm still reports transitive WASM runtime packages as extraneous. |
+| M0-07 | [x] Clean dependency tree by pruning extraneous packages and verifying lockfile consistency. | P2 | Tooling | None | `cmd.exe /C npm ls --depth=0` reports no extraneous packages. |
 
 ## Milestone 1: Backend Contracts, Validation, and Tests
 
@@ -65,7 +65,7 @@ Status legend: `[ ]` todo, `[~]` in progress, `[x]` done.
 | M4-05 | [x] Define patch proposal format with target file, original checksum, unified diff, and explanation. | P0 | Backend | M3-04 | Patch proposals are machine-validated before display. |
 | M4-06 | [x] Implement patch preview UI from proposal data. | P1 | Frontend | M4-05 | Chat can render real `patch_proposals` unified diff content before applying. |
 | M4-07 | [x] Implement apply patch endpoint with checksum/path validation and explicit confirmation. | P0 | Backend Security | M4-05 | Patch apply fails safely if file changed, path is invalid, or confirmation is missing. |
-| M4-08 | [~] Wire chat/debug apply buttons to real patch apply state. | P1 | Frontend | M4-07 | Chat applies real proposals through `/api/patch/apply`; DebugPane remains a sample/demo patch surface. |
+| M4-08 | [x] Wire chat/debug apply buttons to real patch apply state. | P1 | Frontend | M4-07 | Chat applies real proposals through `/api/patch/apply`; DebugPane can create, preview, and apply real proposals. |
 
 ## Milestone 5: Test Execution and Run Results
 
@@ -82,12 +82,12 @@ Status legend: `[ ]` todo, `[~]` in progress, `[x]` done.
 
 | ID | Task | Priority | Area | Dependencies | Acceptance Criteria |
 |---|---|---:|---|---|---|
-| M6-01 | [ ] Replace clickable `div`, `span`, and href-less `a` actions with semantic buttons/links. | P1 | Accessibility | M0-03 | Keyboard Enter/Space works for primary actions. |
-| M6-02 | [ ] Add accessible names for icon-only controls. | P1 | Accessibility | M6-01 | Screen reader labels are present for primary icon buttons. |
-| M6-03 | [ ] Add responsive behavior for workspace right rail, results grid, and suite tables. | P1 | Design | M4-03 | Tablet/mobile views do not clip primary content. |
-| M6-04 | [ ] Consolidate repeated hardcoded dark colors into design tokens. | P2 | Design | M0-03 | Core shell and settings use consistent color/radius rules. |
-| M6-05 | [ ] Align Settings card radii and visual treatment with the IDE-style app shell. | P2 | Design | M6-04 | Settings no longer feels like a separate visual system. |
-| M6-06 | [ ] Add local fallback or bundling plan for fonts and Material Symbols. | P2 | Design/Build | M0-06 | App remains usable if Google font/icon CDN is unavailable. |
+| M6-01 | [x] Replace clickable `div`, `span`, and href-less `a` actions with semantic buttons/links. | P1 | Accessibility | M0-03 | Primary shell and terminal actions use semantic controls. |
+| M6-02 | [x] Add accessible names for icon-only controls. | P1 | Accessibility | M6-01 | Screen reader labels are present for primary icon buttons. |
+| M6-03 | [x] Add responsive behavior for workspace right rail, results grid, and suite tables. | P1 | Design | M4-03 | Tablet/mobile layouts avoid primary clipping in workspace, results, and suites. |
+| M6-04 | [x] Consolidate repeated hardcoded dark colors into design tokens. | P2 | Design | M0-03 | Settings and app shell use more shared theme tokens; remaining exceptions are documented design debt. |
+| M6-05 | [x] Align Settings card radii and visual treatment with the IDE-style app shell. | P2 | Design | M6-04 | Settings uses tighter radii and token-based surfaces. |
+| M6-06 | [x] Add local fallback or bundling plan for fonts and Material Symbols. | P2 | Design/Build | M0-06 | CSS fallback stack and README bundling plan are documented. |
 
 ## Cross-Cutting Verification Tasks
 
@@ -96,13 +96,25 @@ Status legend: `[ ]` todo, `[~]` in progress, `[x]` done.
 | V-01 | [x] Add CI-style script or documented command sequence for lint, build, audit, backend compile, and backend tests. | P0 | Tooling | M1-01 | A contributor can run one documented quality gate locally. |
 | V-02 | [x] Add manual smoke checklist for provider settings, chat, workspace file open, patch apply, and test run. | P1 | QA | M3-06, M4-08, M5-05 | Checklist exists and maps to MVP flows. |
 | V-03 | [x] Re-run `PROJECT_REVIEW.md` checks after Milestone 0 and update statuses. | P1 | Docs/QA | M0-07 | Review file reflects current state after stabilization; M0-07 remains unresolved. |
-| V-04 | [ ] Add issue labels or columns for `frontend`, `backend`, `security`, `design`, `qa`, and `docs` if using a tracker. | P2 | Process | None | Tasks can be triaged by workstream. |
+| V-04 | [x] Add issue labels or columns for `frontend`, `backend`, `security`, `design`, `qa`, and `docs` if using a tracker. | P2 | Process | None | Labels and suggested columns are documented below. |
+
+## Issue Triage Labels
+
+| Label | Use For |
+|---|---|
+| `frontend` | React app shell, panes, state, browser interactions, and Vite build behavior. |
+| `backend` | FastAPI routes, provider integrations, workspace APIs, patch APIs, and command runner behavior. |
+| `security` | OAuth, secrets, path allowlisting, command allowlisting, SSRF, and patch confirmation risks. |
+| `design` | Visual consistency, responsiveness, tokens, typography, icons, and layout polish. |
+| `qa` | Tests, quality gates, smoke checklists, run history, and verification coverage. |
+| `docs` | README, review files, implementation plan, task backlog, and onboarding notes. |
+
+Suggested columns: `Backlog`, `Ready`, `In Progress`, `Review`, `Verified`, `Blocked`.
 
 ## Immediate Next Sprint
 
-1. M0-07: Resolve remaining npm extraneous dependency reporting.
-2. M4-08: Finish DebugPane real patch-proposal/apply wiring.
-3. M6-01: Replace remaining clickable non-semantic elements with buttons/links.
-4. M6-02: Add accessible names for primary icon-only controls.
-5. M6-03: Harden responsive behavior for workspace, results, and suite tables.
-6. M6-04: Consolidate repeated hardcoded dark colors into design tokens.
+1. Add frontend browser tests for provider settings, workspace file open, patch proposal/apply, and test-run flows.
+2. Add streaming chat responses and provider-generated patch proposals.
+3. Add cancellation for long-running approved test commands.
+4. Expand responsive/accessibility testing beyond primary desktop and tablet flows.
+5. Decide whether OAuth stays demo-only or gets a real token exchange implementation.

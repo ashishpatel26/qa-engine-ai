@@ -254,31 +254,6 @@ export default function App() {
     };
   }, []);
 
-  const handleApplyFix = () => {
-    fetch('/api/apply-fix', { method: 'POST' })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          setFixApplied(true);
-          setProblemsCount(0);
-          
-          // Append success log in terminal
-          setTerminalLogs(prev => [
-            ...prev,
-            { type: 'success', text: '[CI] applied patch src/auth/AuthSessionManager.ts successfully. 24/24 regressions PASSED.' }
-          ]);
-          return;
-        }
-        throw new Error(data.detail || data.error || 'Patch apply failed.');
-      })
-      .catch((error) => {
-        setTerminalLogs(prev => [
-          ...prev,
-          { type: 'error', text: `[PATCH] ${error.message}` }
-        ]);
-      });
-  };
-
   const handleConnectService = (service) => {
     fetch('/api/connect', {
       method: 'POST',
@@ -582,7 +557,10 @@ export default function App() {
       {activeView === 'debug' && (
         <DebugPane
           fixApplied={fixApplied}
-          onApplyFix={handleApplyFix}
+          onPatchApplied={() => {
+            setFixApplied(true);
+            setProblemsCount(0);
+          }}
           setActiveView={setActiveView}
         />
       )}

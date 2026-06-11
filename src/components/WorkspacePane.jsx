@@ -609,10 +609,10 @@ export default function WorkspacePane({
   };
 
   return (
-    <div className="flex-1 flex overflow-hidden h-full">
+    <div className="flex-1 flex flex-col xl:flex-row overflow-y-auto xl:overflow-hidden h-full min-w-0">
       {/* Editor Main Section */}
-      <div className="flex-1 flex flex-col h-full overflow-hidden bg-background">
-        <div className="flex h-[36px] bg-surface-container-low border-b border-outline-variant shrink-0">
+      <div className="flex-1 flex flex-col min-h-[360px] xl:min-h-0 xl:h-full overflow-hidden bg-background min-w-0">
+        <div className="flex h-[36px] bg-surface-container-low border-b border-outline-variant shrink-0 overflow-x-auto">
           {openFiles.map(name => {
             const workspacePath = fromWorkspaceTabId(name);
             const workspaceFile = workspacePath
@@ -624,10 +624,10 @@ export default function WorkspacePane({
               <div 
                 key={name}
                 onClick={() => handleActivateTab(name)}
-                className={`flex items-center px-3 gap-2 border-r border-outline-variant cursor-pointer group transition-colors ${isActive ? 'bg-surface-container border-t-2 border-primary text-primary' : 'bg-surface-container-lowest border-t-2 border-transparent text-on-surface-variant'}`}
+                className={`flex shrink-0 items-center px-3 gap-2 border-r border-outline-variant cursor-pointer group transition-colors max-w-[128px] sm:max-w-[160px] ${isActive ? 'bg-surface-container border-t-2 border-primary text-primary' : 'bg-surface-container-lowest border-t-2 border-transparent text-on-surface-variant'}`}
               >
-                <span className="material-symbols-outlined text-[14px]">{getFileIcon(displayName, workspaceFile?.type)}</span>
-                <span className="font-body-sm text-body-sm truncate max-w-[120px]">{displayName}</span>
+                <span className="material-symbols-outlined text-[14px] shrink-0">{getFileIcon(displayName, workspaceFile?.type)}</span>
+                <span className="font-body-sm text-body-sm truncate min-w-0">{displayName}</span>
                 <span 
                   onClick={(e) => {
                     e.stopPropagation();
@@ -637,7 +637,7 @@ export default function WorkspacePane({
                       handleActivateTab(filtered[0] || '');
                     }
                   }}
-                  className="material-symbols-outlined text-[14px] text-on-surface-variant opacity-0 group-hover:opacity-100 hover:text-error transition-opacity"
+                  className="material-symbols-outlined text-[14px] text-on-surface-variant opacity-100 sm:opacity-0 sm:group-hover:opacity-100 hover:text-error transition-opacity shrink-0"
                 >
                   close
                 </span>
@@ -647,16 +647,16 @@ export default function WorkspacePane({
         </div>
         
         {/* Editor Breadcrumbs */}
-        <div className="flex items-center h-7 px-sm bg-surface-container-low border-b border-outline-variant shrink-0 gap-1 text-xs text-on-surface-variant">
+        <div className="flex items-center h-7 px-sm bg-surface-container-low border-b border-outline-variant shrink-0 gap-1 text-xs text-on-surface-variant min-w-0 overflow-hidden">
           {activeBreadcrumbParts.map((part, index) => (
             <span key={`${part}-${index}`} className="contents">
               {index > 0 && (
-                <span className="material-symbols-outlined text-[12px] text-outline-variant">chevron_right</span>
+                <span className="material-symbols-outlined text-[12px] text-outline-variant shrink-0">chevron_right</span>
               )}
-              <span className={index === activeBreadcrumbParts.length - 1 ? 'text-primary truncate' : 'truncate'}>{part}</span>
+              <span className={index === activeBreadcrumbParts.length - 1 ? 'text-primary truncate min-w-0' : 'truncate min-w-0'}>{part}</span>
             </span>
           ))}
-          <span className={`ml-auto rounded-sm border px-1.5 py-[1px] font-label-caps text-[9px] font-bold uppercase tracking-wide ${editorMode.className}`}>
+          <span className={`ml-auto shrink-0 rounded-sm border px-1.5 py-[1px] font-label-caps text-[9px] font-bold uppercase tracking-wide ${editorMode.className}`}>
             {editorMode.label}
           </span>
         </div>
@@ -668,16 +668,16 @@ export default function WorkspacePane({
         )}
         
         {/* Code Canvas */}
-        <div className="flex-1 overflow-auto bg-[#020617] p-4 relative">
+        <div className="flex-1 overflow-auto bg-[#020617] p-sm sm:p-4 relative">
           {getCodeContent()}
         </div>
       </div>
       
       {/* Right Sidebar: Agent Console */}
-      <aside className="w-80 bg-surface-container-low border-l border-outline-variant flex flex-col shrink-0">
-        <div className="h-8 flex items-center px-sm border-b border-outline-variant bg-surface-container shrink-0 text-xs text-on-surface-variant font-label-caps uppercase">
-          <span>Review Agent Console</span>
-          <span className="ml-auto rounded-sm border border-tertiary/40 bg-tertiary/10 px-1.5 py-[1px] font-label-caps text-[9px] font-bold uppercase tracking-wide text-tertiary">Sample</span>
+      <aside className="w-full xl:w-80 max-h-[48vh] xl:max-h-none bg-surface-container-low border-t xl:border-t-0 xl:border-l border-outline-variant flex flex-col shrink-0 min-w-0">
+        <div className="min-h-8 flex items-center gap-sm px-sm py-1 border-b border-outline-variant bg-surface-container shrink-0 text-xs text-on-surface-variant font-label-caps uppercase">
+          <span className="truncate">Review Agent Console</span>
+          <span className="ml-auto shrink-0 rounded-sm border border-tertiary/40 bg-tertiary/10 px-1.5 py-[1px] font-label-caps text-[9px] font-bold uppercase tracking-wide text-tertiary">Sample</span>
         </div>
         
         {/* Agent Activity Card */}
@@ -685,15 +685,15 @@ export default function WorkspacePane({
           <div className="w-full h-[2px] bg-primary/20 relative overflow-hidden">
             <div className="absolute top-0 left-0 h-full bg-primary w-1/3 pulse-slide-bar rounded-r-full"></div>
           </div>
-          <div className="p-sm flex items-center gap-2 border-b border-outline-variant/50 bg-surface-container-high">
-            <span className="material-symbols-outlined text-primary text-[18px] animate-pulse">psychiatry</span>
-            <span className="font-body-sm text-body-sm text-primary font-bold">Analyzing Diff Context</span>
+          <div className="p-sm flex items-center gap-2 border-b border-outline-variant/50 bg-surface-container-high min-w-0">
+            <span className="material-symbols-outlined text-primary text-[18px] animate-pulse shrink-0">psychiatry</span>
+            <span className="font-body-sm text-body-sm text-primary font-bold truncate">Analyzing Diff Context</span>
           </div>
           <div className="p-sm bg-[#060e20] font-code-sm text-code-sm text-on-surface-variant flex flex-col gap-1 max-h-40 overflow-y-auto">
             {consoleLogs.map((log, index) => (
               <div 
                 key={index} 
-                className={`${log.type === 'pulse' ? 'animate-pulse' : ''} ${log.type === 'warn' ? 'text-tertiary' : ''} ${log.type === 'info' ? 'text-on-surface-variant' : ''}`}
+                className={`break-words ${log.type === 'pulse' ? 'animate-pulse' : ''} ${log.type === 'warn' ? 'text-tertiary' : ''} ${log.type === 'info' ? 'text-on-surface-variant' : ''}`}
               >
                 {log.text}
               </div>
@@ -702,12 +702,12 @@ export default function WorkspacePane({
         </div>
         
         {/* Suggestions Panel */}
-        <div className="flex-grow overflow-y-auto p-sm space-y-sm">
+        <div className="flex-grow overflow-y-auto p-sm space-y-sm min-h-0">
           <section className="border border-outline-variant rounded bg-surface-container overflow-hidden">
-            <div className="flex items-center gap-2 border-b border-outline-variant/60 bg-surface-container-high px-2 py-1.5">
-              <span className="material-symbols-outlined text-[15px] text-primary">folder_open</span>
-              <span className="font-label-caps text-label-caps text-on-surface-variant uppercase text-xs">Workspace Files</span>
-              <span className={`ml-auto rounded-sm border px-1.5 py-[1px] font-label-caps text-[9px] font-bold uppercase tracking-wide ${workspaceStatus === 'ready' ? 'border-secondary/40 bg-secondary/10 text-secondary' : workspaceStatus === 'loading' ? 'border-primary/40 bg-primary/10 text-primary' : 'border-tertiary/40 bg-tertiary/10 text-tertiary'}`}>
+            <div className="flex items-center gap-2 border-b border-outline-variant/60 bg-surface-container-high px-2 py-1.5 min-w-0">
+              <span className="material-symbols-outlined text-[15px] text-primary shrink-0">folder_open</span>
+              <span className="font-label-caps text-label-caps text-on-surface-variant uppercase text-xs truncate">Workspace Files</span>
+              <span className={`ml-auto shrink-0 rounded-sm border px-1.5 py-[1px] font-label-caps text-[9px] font-bold uppercase tracking-wide ${workspaceStatus === 'ready' ? 'border-secondary/40 bg-secondary/10 text-secondary' : workspaceStatus === 'loading' ? 'border-primary/40 bg-primary/10 text-primary' : 'border-tertiary/40 bg-tertiary/10 text-tertiary'}`}>
                 {workspaceStatus === 'ready' ? 'Live' : workspaceStatus === 'loading' ? 'Loading' : 'Demo'}
               </span>
             </div>
@@ -727,8 +727,8 @@ export default function WorkspacePane({
 
               {workspaceStatus === 'ready' && (
                 <>
-                  <div className="text-[11px] text-on-surface-variant mb-2">{workspaceMessage}</div>
-                  <div className="max-h-56 overflow-y-auto">
+                  <div className="text-[11px] text-on-surface-variant mb-2 break-words">{workspaceMessage}</div>
+                  <div className="max-h-48 xl:max-h-56 overflow-y-auto">
                     {workspaceFiles.map(file => {
                       const tabId = toWorkspaceTabId(file.path);
                       const isDirectory = file.type === 'directory';
@@ -741,7 +741,7 @@ export default function WorkspacePane({
                           onClick={() => handleOpenWorkspaceFile(file)}
                           disabled={isDirectory}
                           title={file.path}
-                          className={`w-full flex items-center gap-2 px-2 py-1.5 text-left rounded-sm transition-colors ${isActive ? 'bg-surface-container-highest text-primary' : 'text-on-surface-variant hover:bg-surface-variant/40 hover:text-on-surface'} ${isDirectory ? 'cursor-default opacity-70 hover:bg-transparent hover:text-on-surface-variant' : ''}`}
+                          className={`w-full flex items-center gap-2 px-2 py-1.5 text-left rounded-sm transition-colors min-w-0 ${isActive ? 'bg-surface-container-highest text-primary' : 'text-on-surface-variant hover:bg-surface-variant/40 hover:text-on-surface'} ${isDirectory ? 'cursor-default opacity-70 hover:bg-transparent hover:text-on-surface-variant' : ''}`}
                         >
                           <span className="material-symbols-outlined text-[15px] shrink-0">{getFileIcon(file.name, file.type)}</span>
                           <span className="min-w-0 flex-1">
@@ -749,7 +749,7 @@ export default function WorkspacePane({
                             <span className="block truncate text-[10px] text-on-surface-variant/70">{file.path}</span>
                           </span>
                           {file.size !== null && (
-                            <span className="text-[10px] text-on-surface-variant/70 shrink-0">{formatFileSize(file.size)}</span>
+                            <span className="hidden sm:inline text-[10px] text-on-surface-variant/70 shrink-0">{formatFileSize(file.size)}</span>
                           )}
                         </button>
                       );
@@ -760,17 +760,123 @@ export default function WorkspacePane({
             </div>
           </section>
 
+          {/* External Project */}
+          <section className="border border-outline-variant rounded bg-surface-container overflow-hidden">
+            <div className="flex items-center gap-2 border-b border-outline-variant/60 bg-surface-container-high px-2 py-1.5 min-w-0">
+              <span className="material-symbols-outlined text-[15px] text-primary shrink-0">folder_open</span>
+              <span className="font-label-caps text-label-caps text-on-surface-variant uppercase text-xs truncate">Open External Project</span>
+            </div>
+            <div className="p-2 space-y-2">
+              <input
+                value={externalPath}
+                onChange={e => { setExternalPath(e.target.value); setSetRootStatus('idle'); setSetRootMsg(''); }}
+                onKeyDown={e => e.key === 'Enter' && handleSetWorkspaceRoot()}
+                placeholder="C:\Users\you\project or /home/you/project"
+                className="w-full bg-surface-dim border border-outline-variant rounded px-2 py-1.5 text-xs text-on-surface font-mono focus:outline-none focus:border-primary transition-colors"
+              />
+              <button
+                onClick={handleSetWorkspaceRoot}
+                disabled={setRootStatus === 'loading' || !externalPath.trim()}
+                className="w-full py-1.5 rounded bg-primary text-on-primary text-[10px] font-bold uppercase tracking-wide hover:bg-primary-fixed-dim transition-colors disabled:opacity-50 flex items-center justify-center gap-1 min-w-0"
+              >
+                {setRootStatus === 'loading'
+                  ? <><span className="material-symbols-outlined text-[12px] animate-spin">sync</span>Loading...</>
+                  : <><span className="material-symbols-outlined text-[12px]">open_in_new</span>Open Project</>
+                }
+              </button>
+              {setRootMsg && (
+                <p className={`text-[10px] break-words ${setRootStatus === 'error' ? 'text-error' : 'text-secondary'}`}>{setRootMsg}</p>
+              )}
+            </div>
+          </section>
+
+          {/* AI Test Generation */}
+          <section className="border border-outline-variant rounded bg-surface-container overflow-hidden">
+            <div className="flex items-center gap-2 border-b border-outline-variant/60 bg-surface-container-high px-2 py-1.5 min-w-0">
+              <span className="material-symbols-outlined text-[15px] text-secondary shrink-0">science</span>
+              <span className="font-label-caps text-label-caps text-on-surface-variant uppercase text-xs truncate">AI Test Generator</span>
+            </div>
+            <div className="p-2 space-y-2">
+              <p className="text-[10px] text-on-surface-variant break-words">Scan workspace and generate a pytest suite automatically.</p>
+              <input
+                value={genApiKey}
+                onChange={e => setGenApiKey(e.target.value)}
+                type="password"
+                autoComplete="off"
+                placeholder="API key (or set OPENAI_API_KEY env)"
+                className="w-full bg-surface-dim border border-outline-variant rounded px-2 py-1.5 text-xs text-on-surface font-mono focus:outline-none focus:border-primary transition-colors"
+              />
+              <select
+                value={genProvider}
+                onChange={e => setGenProvider(e.target.value)}
+                className="w-full bg-surface-dim border border-outline-variant rounded px-2 py-1.5 text-xs text-on-surface focus:outline-none focus:border-primary transition-colors"
+              >
+                <option value="">Auto (OpenAI)</option>
+                <option value="openai">OpenAI</option>
+                <option value="anthropic">Anthropic</option>
+                <option value="demo">Demo (offline)</option>
+              </select>
+              <button
+                onClick={handleGenerateTests}
+                disabled={generatingTests}
+                className="w-full py-1.5 rounded bg-secondary text-on-secondary text-[10px] font-bold uppercase tracking-wide hover:opacity-90 transition-colors disabled:opacity-50 flex items-center justify-center gap-1 min-w-0"
+              >
+                {generatingTests
+                  ? <><span className="material-symbols-outlined text-[12px] animate-spin">sync</span>Generating...</>
+                  : <><span className="material-symbols-outlined text-[12px]">auto_awesome</span>Generate Test Suite</>
+                }
+              </button>
+            </div>
+          </section>
+
+          {/* Generated test output panel */}
+          {genPanel && (
+            <section className="border border-outline-variant rounded bg-surface-container overflow-hidden">
+              <div className="flex items-center justify-between gap-2 border-b border-outline-variant/60 bg-surface-container-high px-2 py-1.5 min-w-0">
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className={`material-symbols-outlined text-[15px] shrink-0 ${genError ? 'text-error' : 'text-secondary'}`}>
+                    {genError ? 'error_outline' : 'check_circle'}
+                  </span>
+                  <span className="font-label-caps text-label-caps text-on-surface-variant uppercase text-xs truncate">
+                    {genError ? 'Generation Failed' : 'Generated Tests'}
+                  </span>
+                </div>
+                <button onClick={() => setGenPanel(false)} className="text-on-surface-variant hover:text-error transition-colors">
+                  <span className="material-symbols-outlined text-[13px]">close</span>
+                </button>
+              </div>
+              <div className="p-2">
+                {genError ? (
+                  <p className="text-[10px] text-error break-words">{genError}</p>
+                ) : (
+                  <>
+                    <pre className="text-[9px] font-mono text-on-surface-variant bg-surface-dim rounded p-2 overflow-auto max-h-48 whitespace-pre-wrap">{generatedCode}</pre>
+                    <button
+                      onClick={() => { navigator.clipboard?.writeText(generatedCode); }}
+                      className="mt-2 w-full py-1 rounded border border-outline-variant text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest text-[10px] transition-colors flex items-center justify-center gap-1 min-w-0"
+                    >
+                      <span className="material-symbols-outlined text-[12px]">content_copy</span>
+                      Copy to clipboard
+                    </button>
+                  </>
+                )}
+              </div>
+            </section>
+          )}
+
           {!hasActiveRealFileContent && !suggestionDismissed && (
             <>
               <h4 className="font-label-caps text-label-caps text-on-surface-variant uppercase mb-2 text-xs">Initial Findings</h4>
               <div className="p-2 border border-outline-variant rounded bg-surface-variant text-body-sm font-body-sm text-on-surface">
-                <div className="flex items-center gap-1 mb-1">
-                  <span className="material-symbols-outlined text-[14px] text-tertiary">warning</span>
-                  <span className="font-bold text-xs">Test Coverage Warning</span>
+                <div className="flex items-center gap-1 mb-1 min-w-0">
+                  <span className="material-symbols-outlined text-[14px] text-tertiary shrink-0">warning</span>
+                  <span className="font-bold text-xs truncate">Test Coverage Warning</span>
                 </div>
-                <p className="text-on-surface-variant text-xs mt-1">The newly injected `indexer` dependency requires updated unit tests in `ReviewAgent.test.js`. Shall I generate a test suite template?</p>
-                <div className="mt-2 flex gap-2">
-                  <button onClick={handleGenerateTests} className="bg-primary hover:bg-primary-container text-on-primary text-[10px] px-2 py-1 rounded font-bold transition-colors">Generate Tests</button>
+                <p className="text-on-surface-variant text-xs mt-1 break-words">The newly injected `indexer` dependency requires updated unit tests in `ReviewAgent.test.js`. Shall I generate a test suite using the AI Test Generator above?</p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <button onClick={handleGenerateTests} disabled={generatingTests} className="bg-primary hover:bg-primary-container text-on-primary text-[10px] px-2 py-1 rounded font-bold transition-colors disabled:opacity-50">
+                    {generatingTests ? 'Generating...' : 'Generate Tests'}
+                  </button>
                   <button onClick={() => setSuggestionDismissed(true)} className="border border-outline-variant text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest text-[10px] px-2 py-1 rounded transition-colors">Dismiss</button>
                 </div>
               </div>
