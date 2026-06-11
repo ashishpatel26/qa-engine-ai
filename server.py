@@ -22,9 +22,19 @@ import difflib
 
 logger = logging.getLogger(__name__)
 
+_SERVER_PORT = int(os.getenv("QA_ENGINE_PORT", "8000"))
+# OAuth callbacks must land on whatever port the FastAPI process is listening on.
+# Dev default: 8000. Prod: set QA_ENGINE_PORT=8080 or QA_ENGINE_OAUTH_CALLBACK_HOST directly.
+OAUTH_CALLBACK_HOST = os.getenv(
+    "QA_ENGINE_OAUTH_CALLBACK_HOST",
+    f"http://localhost:{_SERVER_PORT}",
+)
+
 DEFAULT_CORS_ORIGINS = [
     "http://localhost:5173",
     "http://localhost:8080",
+    "http://localhost:8005",
+    "http://localhost:8000",
     "http://localhost:3000",
 ]
 
@@ -387,7 +397,7 @@ def oauth_start(service: str):
         # OpenAI uses auth.openai.com with PKCE.
         # The redirect_uri must match what the registered app expects.
         # We use our local callback endpoint here.
-        callback_url = "http://localhost:8080/api/oauth/codex/callback"
+        callback_url = f"{OAUTH_CALLBACK_HOST}/api/oauth/codex/callback"
         params = urllib.parse.urlencode({
             "client_id":             "Gqbzun7No4veAl6GqWVdZnqrMPRVeFAH",
             "redirect_uri":          callback_url,
@@ -404,7 +414,7 @@ def oauth_start(service: str):
         # The Claude Code CLI client_id (9d1c250a-…) is a public PKCE client.
         # Its registered redirect_uri is exactly "http://localhost" (no port);
         # any localhost port redirect is accepted by this client.
-        callback_url = "http://localhost:8080/api/oauth/claude/callback"
+        callback_url = f"{OAUTH_CALLBACK_HOST}/api/oauth/claude/callback"
         params = urllib.parse.urlencode({
             "client_id":             "9d1c250a-e61b-44d8-a05c-7f5bd38ec08c",
             "redirect_uri":          callback_url,
