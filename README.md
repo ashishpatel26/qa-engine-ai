@@ -6,15 +6,16 @@ QA Engine is a **Demo Prototype** of a browser-based AI QA and coding assistant 
 
 - Status: **Demo Prototype**
 - Current goal: stabilize the prototype, label mock behavior honestly, and build toward a real MVP vertical slice.
-- Next milestone focus: frontend truthfulness, backend contracts, provider verification, real chat, workspace file context, patch review/apply, and test execution.
+- Implemented MVP slices: real OpenAI-backed chat path, workspace file listing/read, checksum-validated patch apply API, persisted non-secret settings, allowlisted test execution, and persisted run history.
+- Next milestone focus: broader patch proposal generation, accessibility, responsive hardening, and dependency-tree cleanup.
 
 ## Current Architecture
 
 - Frontend: React 19 + Vite app in `src/`, with panes for workspace, chat, terminal, monitor, test suites, results, debugger, and settings.
-- Backend: FastAPI app in `server.py`, with demo API routes for status, chat, apply-fix, provider connect/disconnect, OAuth callbacks, API key checks, and Ollama detection.
+- Backend: FastAPI app in `server.py`, with API routes for status, settings, chat, workspace file access, patch proposals/apply, provider connect/disconnect, OAuth callbacks, API key checks, Ollama detection, and test runs.
 - Dev proxy: Vite serves the frontend at `http://localhost:5173` and proxies `/api` to `http://localhost:8000`.
 - Static serving: the backend mounts `dist/`, so a backend-only static run expects the frontend to be built first.
-- State: most app state is in browser memory or backend process memory; refreshes and restarts can reset behavior.
+- State: non-secret provider settings and test run history persist to local JSON under `.qa_engine/`; secrets remain session-only.
 
 ## Setup
 
@@ -86,16 +87,24 @@ The current implementation passes lint, build, audit, backend compile, and backe
 
 `npm ls --depth=0` may still report several transitive WASM runtime packages as extraneous even after `npm install` and `npm prune`; this remains tracked in `TASKS.md`.
 
+## Manual Smoke Checklist
+
+1. Start backend and frontend.
+2. Open Settings, toggle OpenAI/Anthropic/Workspace Sync, change the Ollama host, refresh, and confirm non-secret settings remain.
+3. Send a chat message with `OPENAI_API_KEY` configured or an `api_key` request payload; confirm provider errors are shown when no provider is configured.
+4. Open Workspace and select a real project file; confirm real file contents appear.
+5. Create a patch proposal through `/api/patch/proposals`, apply it through `/api/patch/apply` with `confirm: true`, and confirm checksum mismatches are rejected.
+6. Open Test Suites and run an approved command; confirm Results and Terminal show real stdout/stderr, status, exit code, and duration.
+
 ## Known Limitations
 
-- Chat responses are canned keyword responses, not real model completions.
-- Workspace files, code panels, diffs, test suites, terminal output, monitor cards, and run results are sample/demo data.
-- Apply-fix toggles demo state; it does not apply a real patch to project files.
-- Provider connection states can report success without real verification in some paths.
-- OAuth callbacks are prototype-only and do not complete a real token exchange.
-- Ollama detection can return fake localhost models when the local server is unavailable.
-- Settings are not secure secret storage yet.
-- Backend state is global, in-memory, and not per-user.
+- Chat is non-streaming and currently supports the OpenAI provider plus explicit demo mode.
+- Monitor cards, debug root-cause text, and some sample chat content remain demo data.
+- The legacy `/api/apply-fix` endpoint only works in explicit demo mode; real patching uses `/api/patch/proposals` and `/api/patch/apply`.
+- OAuth callbacks are still prototype-only and do not complete a real token exchange.
+- Ollama detection only returns sample localhost models in explicit demo mode.
+- API keys are not secure secret storage yet and are used only for the active browser/request session.
+- Backend state is still single-process and not per-user.
 - Static backend serving depends on `dist/` existing.
 - Some OAuth callback URLs are hardcoded to `localhost:8080` while the Vite dev proxy targets backend port `8000`.
 

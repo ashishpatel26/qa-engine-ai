@@ -275,6 +275,17 @@ class AuthCheckRequest(BaseModel):
     api_key: str
 
 
+class SetWorkspaceRootRequest(BaseModel):
+    path: str
+
+
+class GenerateTestsRequest(BaseModel):
+    target_file: str | None = None
+    output_file: str | None = None
+    api_key: str | None = None
+    provider: str | None = None
+
+
 # ─── OAuth / PKCE helpers ─────────────────────────────────────────────────────
 
 def _reset_state_for_tests() -> None:
@@ -903,6 +914,28 @@ def read_workspace_file(path: str):
     }
 
 
+@app.get("/api/workspace/root")
+def get_workspace_root():
+    return {"root": str(_effective_workspace_root())}
+
+
+@app.post("/api/workspace/set-root")
+def set_workspace_root(req: SetWorkspaceRootRequest):
+    raw = req.path.strip()
+    if not raw:
+        raise HTTPException(status_code=400, detail="Path is required.")
+    candidate = Path(raw).expanduser()
+    if not candidate.is_absolute():
+        raise HTTPException(status_code=400, detail="Path must be absolute.")
+    resolved = candidate.resolve()
+    if not resolved.exists():
+        raise HTTPException(status_code=404, detail="Path does not exist.")
+    if not resolved.is_dir():
+        raise HTTPException(status_code=400, detail="Path must be a directory.")
+    app_state["workspace_root"] = str(resolved)
+    return {"success": True, "root": str(resolved)}
+
+
 @app.post("/api/patch/proposals")
 def create_patch_proposal(req: PatchProposalRequest):
     target, content, _size = _read_workspace_text_file(req.target_file)
@@ -1026,11 +1059,93 @@ class DemoProvider(ChatProvider):
 
     def chat_completion(self, messages: list[dict[str, str]], model: str) -> str:
         q = " ".join(m["content"] for m in messages if m.get("role") == "user").lower()
+        if "generate" in q or ("test" in q and "source" in q):
+            return (
+                "import pytest\n\n"
+                "def test_example_passes():\n"
+                "    \"\"\"Demo: generated skeleton test.\"\"\"\n"
+                "    assert True\n"
+            )
         if "run" in q or "test" in q:
             return "Triggered the regression test runner. All 24 core API units passed. Review the timeline in **Runs**."
         if "auth" in q or "bug" in q:
             return "Detected the session invalidation exception in `AuthSessionManager.ts`. Open **Debugger** or apply the patch."
         return f"Ready to assist in demo mode. Configure OpenAI for real model-backed responses. (Model: {model})"
+
+
+ANTHROPIC_CHAT_URL = "https://api.anthropic.com/v1/messages"
+ANTHROPIC_TIMEOUT_SECONDS = float(os.getenv("QA_ENGINE_ANTHROPIC_TIMEOUT_SECONDS", "60"))
+DEFAULT_ANTHROPIC_MODEL = "claude-haiku-4-5-20251001"
+
+
+class AnthropicProvider(ChatProvider):
+    name = "anthropic"
+
+    def __init__(self, api_key: str):
+        self.api_key = api_key
+
+    def list_models(self) -> list[str]:
+        request = urllib.request.Request(
+            "https://api.anthropic.com/v1/models",
+            headers={"x-api-key": self.api_key, "anthropic-version": "2023-06-01"},
+            method="GET",
+        )
+        try:
+            with urllib.request.urlopen(request, timeout=ANTHROPIC_TIMEOUT_SECONDS) as response:
+                data = json.loads(response.read().decode("utf-8"))
+        except urllib.error.HTTPError as exc:
+            raise ProviderError(f"Anthropic model listing failed with HTTP {exc.code}.") from exc
+        except Exception as exc:
+            raise ProviderError("Anthropic model listing failed.") from exc
+        return [item["id"] for item in data.get("data", []) if item.get("id")]
+
+    def chat_completion(self, messages: list[dict[str, str]], model: str) -> str:
+        system_parts: list[str] = []
+        user_messages: list[dict[str, str]] = []
+        for m in messages:
+            if m.get("role") == "system":
+                system_parts.append(m["content"])
+            else:
+                user_messages.append(m)
+
+        payload: dict[str, Any] = {
+            "model": model or DEFAULT_ANTHROPIC_MODEL,
+            "max_tokens": 8192,
+            "messages": user_messages,
+        }
+        if system_parts:
+            payload["system"] = "\n\n".join(system_parts)
+
+        request = urllib.request.Request(
+            ANTHROPIC_CHAT_URL,
+            data=json.dumps(payload).encode("utf-8"),
+            headers={
+                "x-api-key": self.api_key,
+                "anthropic-version": "2023-06-01",
+                "Content-Type": "application/json",
+            },
+            method="POST",
+        )
+        try:
+            with urllib.request.urlopen(request, timeout=ANTHROPIC_TIMEOUT_SECONDS) as response:
+                data = json.loads(response.read().decode("utf-8"))
+        except urllib.error.HTTPError as exc:
+            code = exc.code
+            msg = "Anthropic authentication failed. Check the API key." if code == 401 else f"Anthropic API failed with HTTP {code}."
+            raise ProviderError(msg, 401 if code == 401 else 502) from exc
+        except urllib.error.URLError as exc:
+            raise ProviderError("Could not reach Anthropic. Check network access.") from exc
+        except Exception as exc:
+            logger.exception("Anthropic chat completion failed")
+            raise ProviderError("Anthropic chat request failed.") from exc
+
+        try:
+            content = data["content"][0]["text"]
+        except (KeyError, IndexError, TypeError) as exc:
+            raise ProviderError("Anthropic returned an unexpected response.") from exc
+        if not isinstance(content, str) or not content.strip():
+            raise ProviderError("Anthropic returned an empty response.")
+        return content
 
 
 def _openai_status_code(exc: urllib.error.HTTPError) -> int:
