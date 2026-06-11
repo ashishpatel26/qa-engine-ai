@@ -1190,6 +1190,15 @@ def _provider_for_chat(req: ChatRequest) -> ChatProvider:
             return DemoProvider()
         raise HTTPException(status_code=400, detail="Demo chat requires QA_ENGINE_DEMO_MODE=true.")
 
+    if requested_provider in {"anthropic", "claude"}:
+        api_key = (req.api_key or os.getenv("ANTHROPIC_API_KEY", "")).strip()
+        if not api_key:
+            raise HTTPException(
+                status_code=400,
+                detail="No Anthropic API key configured. Set ANTHROPIC_API_KEY or include an api_key in the request.",
+            )
+        return AnthropicProvider(api_key)
+
     if requested_provider in {"", "openai", "codex"}:
         api_key = _openai_api_key(req)
         if api_key:
@@ -1432,6 +1441,125 @@ def create_test_run(req: TestRunRequest):
         "timed_out": status == "timeout",
     }
     return _record_run(run)
+
+
+# ─── AI test generation ───────────────────────────────────────────────────────
+
+SOURCE_EXTENSIONS = {".py", ".ts", ".tsx", ".js", ".jsx"}
+_TEST_MARKERS = {"test_", "_test.", ".test.", ".spec."}
+GENERATION_MAX_FILES = int(os.getenv("QA_ENGINE_GEN_MAX_FILES", "6"))
+_GEN_EXCLUDED = WORKSPACE_EXCLUDED_NAMES | {"tests", "__pycache__", ".codegraph", ".qa_engine", ".remember"}
+GENERATION_SYSTEM_PROMPT = (
+    "You are an expert software engineer specialising in test automation. "
+    "Generate a comprehensive pytest test suite for the provided source code.\n\n"
+    "Rules:\n"
+    "- Write ONLY valid Python 3 code using pytest — no markdown, no explanation, no code fences\n"
+    "- Include all necessary imports at the top\n"
+    "- Use pytest fixtures for repeated setup\n"
+    "- Test happy paths AND error/edge cases\n"
+    "- Mock external HTTP calls, filesystem, subprocess, and database access\n"
+    "- Descriptive test names: test_<component>_<scenario>\n"
+    "- One-line docstring per test explaining the scenario\n"
+    "- For JS/TS frontend files generate FastAPI TestClient integration tests\n"
+    "- Return ONLY raw Python — no ```python fences, no commentary"
+)
+
+
+def _is_test_file(name: str) -> bool:
+    return any(marker in name for marker in _TEST_MARKERS)
+
+
+def _collect_source_files(
+    root: Path,
+    target_file: str | None,
+    max_files: int = GENERATION_MAX_FILES,
+) -> list[tuple[str, str]]:
+    if target_file:
+        path, content, _ = _read_workspace_text_file(target_file)
+        return [(_public_workspace_path(path), content)]
+
+    collected: list[tuple[str, str]] = []
+    for path in sorted(root.rglob("*")):
+        if len(collected) >= max_files:
+            break
+        if not path.is_file():
+            continue
+        if path.suffix not in SOURCE_EXTENSIONS:
+            continue
+        if any(part in _GEN_EXCLUDED for part in path.parts):
+            continue
+        if _is_test_file(path.name):
+            continue
+        try:
+            resolved = path.resolve()
+            resolved.relative_to(root)
+            if path.stat().st_size > WORKSPACE_MAX_FILE_BYTES:
+                continue
+            content = path.read_bytes().decode("utf-8", errors="replace")
+            collected.append((_public_workspace_path(resolved), content))
+        except (ValueError, OSError):
+            continue
+    return collected
+
+
+def _build_generation_prompt(files: list[tuple[str, str]]) -> str:
+    file_list = "\n".join(f"  - {p}" for p, _ in files)
+    sections = "\n\n".join(f"=== {p} ===\n{c}" for p, c in files)
+    return (
+        f"Analyse the following source files and generate pytest tests.\n\n"
+        f"Files:\n{file_list}\n\nSource:\n{sections}"
+    )
+
+
+def _strip_code_fences(code: str) -> str:
+    lines = code.strip().splitlines()
+    if lines and lines[0].startswith("```"):
+        lines = lines[1:]
+    if lines and lines[-1].strip() == "```":
+        lines = lines[:-1]
+    return "\n".join(lines).strip()
+
+
+@app.post("/api/generate-tests")
+def generate_tests(req: GenerateTestsRequest):
+    root = _effective_workspace_root()
+    files = _collect_source_files(root, req.target_file)
+    if not files:
+        raise HTTPException(status_code=422, detail="No source files found to generate tests for.")
+
+    chat_req = ChatRequest(api_key=req.api_key, provider=req.provider)
+    provider = _provider_for_chat(chat_req)
+
+    turns: list[dict[str, str]] = [
+        {"role": "system", "content": GENERATION_SYSTEM_PROMPT},
+        {"role": "user", "content": _build_generation_prompt(files)},
+    ]
+    try:
+        raw = provider.chat_completion(turns, DEFAULT_CHAT_MODEL)
+    except ProviderError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=exc.public_message) from exc
+
+    generated_code = _strip_code_fences(raw)
+
+    output_path: str | None = None
+    if req.output_file:
+        try:
+            target = _resolve_workspace_path(req.output_file)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text(generated_code, encoding="utf-8")
+            output_path = _public_workspace_path(target)
+        except HTTPException:
+            raise
+        except OSError as exc:
+            raise HTTPException(status_code=500, detail=f"Could not write output file: {exc}") from exc
+
+    return {
+        "success": True,
+        "generated_code": generated_code,
+        "source_files": [p for p, _ in files],
+        "output_file": output_path,
+        "provider": provider.name,
+    }
 
 
 def _should_mount_static(directory: Path) -> bool:

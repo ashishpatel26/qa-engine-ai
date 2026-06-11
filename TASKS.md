@@ -41,42 +41,42 @@ Status legend: `[ ]` todo, `[~]` in progress, `[x]` done.
 | M2-04 | [x] Remove time-based OAuth mock success outside demo mode. | P0 | Frontend Security | M1-04, M1-05 | Closing a popup never creates a real connected account unless backend verifies it. |
 | M2-05 | [x] Make Ollama detection return real failure by default and fake models only in explicit demo mode. | P0 | Backend | M1-02 | Localhost without Ollama reports failure unless demo mode is on. |
 | M2-06 | [x] Add host parsing and allowlisting for Ollama detection to reduce SSRF risk. | P0 | Backend Security | M2-05 | Only local/allowed hosts can be probed. |
-| M2-07 | [ ] Persist non-secret provider settings such as enabled providers and base URLs. | P1 | Backend/Frontend | M2-03 | Refresh preserves non-secret settings. |
+| M2-07 | [x] Persist non-secret provider settings such as enabled providers and base URLs. | P1 | Backend/Frontend | M2-03 | Refresh preserves non-secret settings via `/api/settings` and local JSON storage; API keys remain session-only. |
 
 ## Milestone 3: Real Chat Vertical Slice
 
 | ID | Task | Priority | Area | Dependencies | Acceptance Criteria |
 |---|---|---:|---|---|---|
-| M3-01 | [ ] Define provider abstraction interface for model listing and chat completion. | P0 | Backend | M2-03 | Backend can route chat through a configured provider implementation. |
-| M3-02 | [ ] Implement OpenAI chat path using configured API key or environment variable. | P0 | Backend | M3-01 | A real prompt returns a real provider response when credentials are valid. |
-| M3-03 | [ ] Implement clear no-provider and provider-error responses. | P0 | Backend/Frontend | M3-02 | UI shows actionable errors instead of canned fallback success. |
-| M3-04 | [ ] Update `/api/chat` request and response schema for model, messages, context files, logs, and patch proposals. | P1 | Backend | M3-01 | Schema is documented in code and covered by tests. |
-| M3-05 | [ ] Replace keyword-only canned chat with real provider behavior outside demo mode. | P0 | Backend | M3-02, M3-04 | "run tests" and "auth bug" no longer produce fake success in production mode. |
-| M3-06 | [ ] Add chat UI loading, retry, and error states. | P1 | Frontend | M3-03 | User sees progress and recoverable errors. |
+| M3-01 | [x] Define provider abstraction interface for model listing and chat completion. | P0 | Backend | M2-03 | Backend can route chat through a configured provider implementation. |
+| M3-02 | [x] Implement OpenAI chat path using configured API key or environment variable. | P0 | Backend | M3-01 | A real prompt returns a real provider response when credentials are valid. |
+| M3-03 | [x] Implement clear no-provider and provider-error responses. | P0 | Backend/Frontend | M3-02 | UI shows actionable errors instead of canned fallback success. |
+| M3-04 | [x] Update `/api/chat` request and response schema for model, messages, context files, logs, and patch proposals. | P1 | Backend | M3-01 | Schema is covered by backend tests and React response mapping. |
+| M3-05 | [x] Replace keyword-only canned chat with real provider behavior outside demo mode. | P0 | Backend | M3-02, M3-04 | "run tests" and "auth bug" no longer produce fake success in production mode. |
+| M3-06 | [x] Add chat UI loading, retry, and error states. | P1 | Frontend | M3-03 | User sees progress and recoverable errors. |
 
 ## Milestone 4: Workspace and Patch Workflow
 
 | ID | Task | Priority | Area | Dependencies | Acceptance Criteria |
 |---|---|---:|---|---|---|
-| M4-01 | [ ] Add backend workspace file listing endpoint with project-root path allowlisting. | P0 | Backend Security | M1-02 | API cannot read outside the allowed workspace root. |
-| M4-02 | [ ] Add backend file read endpoint for text files with size limits. | P0 | Backend Security | M4-01 | UI can load real project files safely. |
-| M4-03 | [ ] Replace hardcoded workspace file tree with real API data. | P1 | Frontend | M4-01, M4-02 | Explorer displays actual project files. |
-| M4-04 | [ ] Replace hardcoded code panels with actual file content view. | P1 | Frontend | M4-02 | Opening a file displays its real contents. |
-| M4-05 | [ ] Define patch proposal format with target file, original checksum, unified diff, and explanation. | P0 | Backend | M3-04 | Patch proposals are machine-validated before display. |
-| M4-06 | [ ] Implement patch preview UI from proposal data. | P1 | Frontend | M4-05 | User can review real proposed changes before applying. |
-| M4-07 | [ ] Implement apply patch endpoint with checksum/path validation and explicit confirmation. | P0 | Backend Security | M4-05 | Patch apply fails safely if file changed or path is invalid. |
-| M4-08 | [ ] Wire chat/debug apply buttons to real patch apply state. | P1 | Frontend | M4-07 | Apply success reflects actual file change, not only UI state. |
+| M4-01 | [x] Add backend workspace file listing endpoint with project-root path allowlisting. | P0 | Backend Security | M1-02 | API cannot read outside the allowed workspace root. |
+| M4-02 | [x] Add backend file read endpoint for text files with size limits. | P0 | Backend Security | M4-01 | UI can load real project files safely. |
+| M4-03 | [x] Replace hardcoded workspace file tree with real API data. | P1 | Frontend | M4-01, M4-02 | Explorer displays actual project files. |
+| M4-04 | [x] Replace hardcoded code panels with actual file content view. | P1 | Frontend | M4-02 | Opening a file displays its real contents. |
+| M4-05 | [x] Define patch proposal format with target file, original checksum, unified diff, and explanation. | P0 | Backend | M3-04 | Patch proposals are machine-validated before display. |
+| M4-06 | [x] Implement patch preview UI from proposal data. | P1 | Frontend | M4-05 | Chat can render real `patch_proposals` unified diff content before applying. |
+| M4-07 | [x] Implement apply patch endpoint with checksum/path validation and explicit confirmation. | P0 | Backend Security | M4-05 | Patch apply fails safely if file changed, path is invalid, or confirmation is missing. |
+| M4-08 | [~] Wire chat/debug apply buttons to real patch apply state. | P1 | Frontend | M4-07 | Chat applies real proposals through `/api/patch/apply`; DebugPane remains a sample/demo patch surface. |
 
 ## Milestone 5: Test Execution and Run Results
 
 | ID | Task | Priority | Area | Dependencies | Acceptance Criteria |
 |---|---|---:|---|---|---|
-| M5-01 | [ ] Define allowlisted test command configuration. | P0 | Backend Security | M1-02 | Only approved commands can run. |
-| M5-02 | [ ] Implement safe command runner with timeout, captured output, exit code, and cancellation plan. | P0 | Backend | M5-01 | Backend can run a configured test command and return structured output. |
-| M5-03 | [ ] Add persisted run result model. | P1 | Backend | M5-02 | Run history survives refresh/restart according to chosen persistence layer. |
-| M5-04 | [ ] Replace test suite dashboard hardcoded values with run API data. | P1 | Frontend | M5-03 | Suite/result pages show real latest run state. |
-| M5-05 | [ ] Add frontend controls for starting a configured test run. | P1 | Frontend | M5-02 | Running a suite creates a real run result. |
-| M5-06 | [ ] Add tests for command validation, timeout behavior, and failed command output. | P0 | Backend QA | M5-02 | Dangerous/unknown commands are rejected in tests. |
+| M5-01 | [x] Define allowlisted test command configuration. | P0 | Backend Security | M1-02 | Only approved commands can run. |
+| M5-02 | [x] Implement safe command runner with timeout, captured output, exit code, and cancellation plan. | P0 | Backend | M5-01 | Backend can run a configured test command and return structured output. |
+| M5-03 | [x] Add persisted run result model. | P1 | Backend | M5-02 | Run history survives refresh/restart through local JSON storage. |
+| M5-04 | [x] Replace test suite dashboard hardcoded values with run API data. | P1 | Frontend | M5-03 | Suite/result pages show real latest run state. |
+| M5-05 | [x] Add frontend controls for starting a configured test run. | P1 | Frontend | M5-02 | Running a suite creates a real run result. |
+| M5-06 | [x] Add tests for command validation, timeout behavior, and failed command output. | P0 | Backend QA | M5-02 | Dangerous/unknown commands are rejected in tests. |
 
 ## Milestone 6: UX, Accessibility, and Responsive Hardening
 
@@ -94,16 +94,15 @@ Status legend: `[ ]` todo, `[~]` in progress, `[x]` done.
 | ID | Task | Priority | Area | Dependencies | Acceptance Criteria |
 |---|---|---:|---|---|---|
 | V-01 | [x] Add CI-style script or documented command sequence for lint, build, audit, backend compile, and backend tests. | P0 | Tooling | M1-01 | A contributor can run one documented quality gate locally. |
-| V-02 | [ ] Add manual smoke checklist for provider settings, chat, workspace file open, patch apply, and test run. | P1 | QA | M3-06, M4-08, M5-05 | Checklist exists and maps to MVP flows. |
-| V-03 | [ ] Re-run `PROJECT_REVIEW.md` checks after Milestone 0 and update statuses. | P1 | Docs/QA | M0-07 | Review file reflects current state after stabilization. |
+| V-02 | [x] Add manual smoke checklist for provider settings, chat, workspace file open, patch apply, and test run. | P1 | QA | M3-06, M4-08, M5-05 | Checklist exists and maps to MVP flows. |
+| V-03 | [~] Re-run `PROJECT_REVIEW.md` checks after Milestone 0 and update statuses. | P1 | Docs/QA | M0-07 | Review file is being refreshed; M0-07 remains unresolved. |
 | V-04 | [ ] Add issue labels or columns for `frontend`, `backend`, `security`, `design`, `qa`, and `docs` if using a tracker. | P2 | Process | None | Tasks can be triaged by workstream. |
 
 ## Immediate Next Sprint
 
 1. M0-07: Resolve remaining npm extraneous dependency reporting.
-2. M2-07: Persist non-secret provider settings.
-3. M3-01: Define provider abstraction interface for model listing and chat completion.
-4. M3-02: Implement OpenAI chat path using configured API key or environment variable.
-5. M3-03: Implement clear no-provider and provider-error responses.
-6. M4-01: Add backend workspace file listing endpoint with project-root path allowlisting.
-7. M4-02: Add backend file read endpoint for text files with size limits.
+2. M4-08: Finish DebugPane real patch-proposal/apply wiring.
+3. M6-01: Replace remaining clickable non-semantic elements with buttons/links.
+4. M6-02: Add accessible names for primary icon-only controls.
+5. M6-03: Harden responsive behavior for workspace, results, and suite tables.
+6. M6-04: Consolidate repeated hardcoded dark colors into design tokens.
