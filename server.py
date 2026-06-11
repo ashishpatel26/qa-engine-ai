@@ -783,18 +783,20 @@ def detect_ollama_models(req: OllamaDetectRequest):
 # ─── Workspace files ──────────────────────────────────────────────────────────
 
 def _public_workspace_path(path: Path) -> str:
-    relative = path.resolve().relative_to(PROJECT_ROOT)
+    root = _effective_workspace_root()
+    relative = path.resolve().relative_to(root)
     return relative.as_posix() or "."
 
 
 def _resolve_workspace_path(requested_path: str | None) -> Path:
+    root = _effective_workspace_root()
     raw_path = (requested_path or ".").strip() or "."
     candidate = Path(raw_path)
     if not candidate.is_absolute():
-        candidate = PROJECT_ROOT / candidate
+        candidate = root / candidate
     resolved = candidate.resolve()
     try:
-        resolved.relative_to(PROJECT_ROOT)
+        resolved.relative_to(root)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail="Path is outside the workspace root.") from exc
     return resolved
@@ -869,9 +871,10 @@ def list_workspace_files(path: str = "."):
     for child in children:
         if child.name in WORKSPACE_EXCLUDED_NAMES:
             continue
+        root = _effective_workspace_root()
         try:
             resolved = child.resolve()
-            resolved.relative_to(PROJECT_ROOT)
+            resolved.relative_to(root)
         except ValueError:
             continue
 
@@ -886,7 +889,7 @@ def list_workspace_files(path: str = "."):
         if len(entries) >= WORKSPACE_MAX_LIST_ENTRIES:
             break
 
-    return {"root": str(PROJECT_ROOT), "path": _public_workspace_path(target), "entries": entries}
+    return {"root": str(_effective_workspace_root()), "path": _public_workspace_path(target), "entries": entries}
 
 
 @app.get("/api/workspace/file")
