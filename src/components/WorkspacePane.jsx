@@ -184,6 +184,19 @@ export default function WorkspacePane({
   const [workspaceMessage, setWorkspaceMessage] = useState('Checking /api/workspace/files for real workspace data...');
   const [fileContentByPath, setFileContentByPath] = useState({});
 
+  // Generate tests state
+  const [generatingTests, setGeneratingTests] = useState(false);
+  const [generatedCode, setGeneratedCode] = useState('');
+  const [genError, setGenError] = useState('');
+  const [genPanel, setGenPanel] = useState(false);
+  const [genApiKey, setGenApiKey] = useState('');
+  const [genProvider, setGenProvider] = useState('');
+
+  // External project state
+  const [externalPath, setExternalPath] = useState('');
+  const [setRootStatus, setSetRootStatus] = useState('idle'); // idle | loading | ok | error
+  const [setRootMsg, setSetRootMsg] = useState('');
+
   const activeWorkspacePath = fromWorkspaceTabId(activeFile);
   const activeWorkspaceFile = useMemo(
     () => workspaceFiles.find(file => file.path === activeWorkspacePath) ?? null,
@@ -520,13 +533,79 @@ export default function WorkspacePane({
     return <div className="p-md">No file opened in editor.</div>;
   };
 
-  const handleGenerateTests = () => {
-    alert('Mock: AST parsing completed. Test skeleton added to ReviewAgent.test.js.');
-    setConsoleLogs(prev => [
-      ...prev,
-      { type: 'info', text: '➜ Generated tests skeleton for ReviewAgent.js' }
-    ]);
-    setSuggestionDismissed(true);
+  const handleGenerateTests = async () => {
+    setGeneratingTests(true);
+    setGenError('');
+    setGeneratedCode('');
+
+    const targetFile = activeFile && !activeFile.startsWith('workspace:') ? null
+      : activeFile?.startsWith('workspace:') ? activeFile.slice('workspace:'.length) : null;
+
+    try {
+      const body = { target_file: targetFile || null };
+      if (genApiKey.trim()) body.api_key = genApiKey.trim();
+      if (genProvider.trim()) body.provider = genProvider.trim();
+
+      const res = await fetch('/api/generate-tests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.detail || data.error || `HTTP ${res.status}`);
+      }
+
+      setGeneratedCode(data.generated_code || '');
+      setGenPanel(true);
+      setSuggestionDismissed(true);
+      setConsoleLogs(prev => [
+        ...prev,
+        { type: 'info', text: `➜ Tests generated via ${data.provider} for ${(data.source_files || []).length} file(s)` }
+      ]);
+    } catch (err) {
+      setGenError(err.message || 'Test generation failed.');
+      setGenPanel(true);
+      setConsoleLogs(prev => [
+        ...prev,
+        { type: 'warn', text: `⚙ Test generation failed: ${err.message}` }
+      ]);
+    } finally {
+      setGeneratingTests(false);
+    }
+  };
+
+  const handleSetWorkspaceRoot = async () => {
+    const path = externalPath.trim();
+    if (!path) return;
+    setSetRootStatus('loading');
+    setSetRootMsg('');
+    try {
+      const res = await fetch('/api/workspace/set-root', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || `HTTP ${res.status}`);
+      setSetRootStatus('ok');
+      setSetRootMsg(`Root set to: ${data.root}`);
+      // Reload workspace files with new root
+      setWorkspaceStatus('loading');
+      setWorkspaceFiles([]);
+      const filesRes = await fetch('/api/workspace/files', { headers: { Accept: 'application/json' } });
+      if (filesRes.ok) {
+        const payload = await filesRes.json();
+        const files = normalizeWorkspaceFiles(payload);
+        setWorkspaceFiles(files);
+        setWorkspaceStatus('ready');
+        setWorkspaceMessage(`${files.length} item(s) loaded from ${data.root}`);
+      }
+    } catch (err) {
+      setSetRootStatus('error');
+      setSetRootMsg(err.message || 'Failed to set workspace root.');
+    }
   };
 
   return (

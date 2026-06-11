@@ -95,7 +95,7 @@ Status legend: `[ ]` todo, `[~]` in progress, `[x]` done.
 |---|---|---:|---|---|---|
 | V-01 | [x] Add CI-style script or documented command sequence for lint, build, audit, backend compile, and backend tests. | P0 | Tooling | M1-01 | A contributor can run one documented quality gate locally. |
 | V-02 | [x] Add manual smoke checklist for provider settings, chat, workspace file open, patch apply, and test run. | P1 | QA | M3-06, M4-08, M5-05 | Checklist exists and maps to MVP flows. |
-| V-03 | [~] Re-run `PROJECT_REVIEW.md` checks after Milestone 0 and update statuses. | P1 | Docs/QA | M0-07 | Review file is being refreshed; M0-07 remains unresolved. |
+| V-03 | [x] Re-run `PROJECT_REVIEW.md` checks after Milestone 0 and update statuses. | P1 | Docs/QA | M0-07 | Review file reflects current state after stabilization; M0-07 remains unresolved. |
 | V-04 | [ ] Add issue labels or columns for `frontend`, `backend`, `security`, `design`, `qa`, and `docs` if using a tracker. | P2 | Process | None | Tasks can be triaged by workstream. |
 
 ## Immediate Next Sprint
