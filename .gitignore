@@ -13,6 +13,9 @@ dist-ssr
 *.local
 .venv
 .qa_engine/
+.env
+.env.*
+!.env.example
 __pycache__/
 *.py[cod]
 *.egg-info/

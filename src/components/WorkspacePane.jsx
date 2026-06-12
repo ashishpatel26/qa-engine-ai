@@ -594,17 +594,22 @@ export default function WorkspacePane({
       // Reload workspace files with new root
       setWorkspaceStatus('loading');
       setWorkspaceFiles([]);
-      const filesRes = await fetch('/api/workspace/files', { headers: { Accept: 'application/json' } });
-      if (filesRes.ok) {
+      try {
+        const filesRes = await fetch('/api/workspace/files', { headers: { Accept: 'application/json' } });
+        if (!filesRes.ok) throw new Error(`Files fetch failed: HTTP ${filesRes.status}`);
         const payload = await filesRes.json();
         const files = normalizeWorkspaceFiles(payload);
         setWorkspaceFiles(files);
         setWorkspaceStatus('ready');
         setWorkspaceMessage(`${files.length} item(s) loaded from ${data.root}`);
+      } catch (filesErr) {
+        setWorkspaceStatus('error');
+        setWorkspaceMessage(filesErr.message || 'Failed to load workspace files.');
       }
     } catch (err) {
       setSetRootStatus('error');
       setSetRootMsg(err.message || 'Failed to set workspace root.');
+      setWorkspaceStatus('demo');
     }
   };
 

@@ -1,7 +1,7 @@
 from pathlib import Path
 from abc import ABC, abstractmethod
 from typing import Any
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, Field
@@ -337,13 +337,14 @@ def _validate_oauth_service(service: str) -> str:
     return service
 
 
-def _new_oauth_session(service: str, code_verifier: str) -> dict:
+def _new_oauth_session(service: str, code_verifier: str, frontend_origin: str = "") -> dict:
     now = time.time()
     return {
         "service": service,
         "status": "pending",
         "user": None,
         "code_verifier": code_verifier,
+        "frontend_origin": frontend_origin,
         "created_at": now,
         "expires_at": now + OAUTH_SESSION_TTL_SECONDS,
     }
@@ -380,7 +381,7 @@ def _pkce_pair() -> tuple[str, str]:
 # ─── OAuth endpoints ─────────────────────────────────────────────────────────
 
 @app.get("/api/oauth/{service}/start")
-def oauth_start(service: str):
+def oauth_start(service: str, request: Request):
     """
     Generate an OAuth PKCE state token and return the provider authorization URL.
     service: "codex" | "claude"
@@ -388,10 +389,13 @@ def oauth_start(service: str):
     _validate_oauth_service(service)
     _cleanup_oauth_sessions()
 
+    # Capture the caller's origin so the callback can use it as postMessage targetOrigin.
+    frontend_origin = request.headers.get("origin", "").strip() or OAUTH_CALLBACK_HOST
+
     state_token    = secrets.token_urlsafe(20)
     code_verifier, code_challenge = _pkce_pair()
 
-    oauth_sessions[state_token] = _new_oauth_session(service, code_verifier)
+    oauth_sessions[state_token] = _new_oauth_session(service, code_verifier, frontend_origin)
 
     if service == "codex":
         # OpenAI uses auth.openai.com with PKCE.
@@ -441,25 +445,31 @@ def oauth_callback(service: str, code: str = None, state: str = None, error: str
     _validate_oauth_service(service)
     _cleanup_oauth_sessions()
 
+    def _origin(s: str) -> str:
+        return oauth_sessions.get(s, {}).get("frontend_origin", OAUTH_CALLBACK_HOST)
+
     if error:
         if state and state in oauth_sessions:
             oauth_sessions[state]["status"] = "error"
         html = _callback_html(service, success=False,
                               message=f"Authorization denied: {error}",
-                              state=state or "")
+                              state=state or "",
+                              frontend_origin=_origin(state or ""))
         return HTMLResponse(html)
 
     if not code or not state or state not in oauth_sessions:
         html = _callback_html(service, success=False,
                               message="Invalid callback parameters — session not found.",
-                              state=state or "")
+                              state=state or "",
+                              frontend_origin=OAUTH_CALLBACK_HOST)
         return HTMLResponse(html)
 
     if oauth_sessions[state].get("service") != service:
         oauth_sessions[state]["status"] = "error"
         html = _callback_html(service, success=False,
                               message="OAuth state does not match this service.",
-                              state=state)
+                              state=state,
+                              frontend_origin=_origin(state))
         return HTMLResponse(html)
 
     # Mark session as completed
@@ -478,7 +488,8 @@ def oauth_callback(service: str, code: str = None, state: str = None, error: str
     html = _callback_html(service, success=True,
                           message=f"Successfully connected {service_label}!",
                           state=state,
-                          user=user_info)
+                          user=user_info,
+                          frontend_origin=_origin(state))
     return HTMLResponse(html)
 
 
@@ -491,7 +502,7 @@ def oauth_status(service: str, state_token: str):
     return _public_oauth_session(service, session)
 
 
-def _callback_html(service: str, success: bool, message: str, state: str, user: dict = None) -> str:
+def _callback_html(service: str, success: bool, message: str, state: str, user: dict = None, frontend_origin: str = "") -> str:
     """Premium branded callback page — postMessages result to parent then self-closes."""
     is_codex      = service == "codex"
     service_label = "Codex" if is_codex else "ClaudeCode"
@@ -626,9 +637,10 @@ def _callback_html(service: str, success: bool, message: str, state: str, user: 
       user: {user_json},
       state: {json.dumps(state)}
     }};
-    // Send to parent window immediately
+    // Restrict postMessage to the frontend origin captured at oauth_start time.
+    const targetOrigin = {json.dumps(frontend_origin or OAUTH_CALLBACK_HOST)};
     if (window.opener && !window.opener.closed) {{
-      window.opener.postMessage(payload, '*');
+      window.opener.postMessage(payload, targetOrigin);
     }}
     // Also broadcast to any same-origin tabs
     try {{ localStorage.setItem('qa_oauth_result', JSON.stringify(payload)); }} catch(e) {{}}
@@ -953,6 +965,23 @@ def set_workspace_root(req: SetWorkspaceRootRequest):
         raise HTTPException(status_code=404, detail="Path does not exist.")
     if not resolved.is_dir():
         raise HTTPException(status_code=400, detail="Path must be a directory.")
+    # Security: only allow roots within PROJECT_ROOT or explicitly allowlisted paths.
+    # Prevents arbitrary filesystem traversal via generate-tests / workspace file APIs.
+    _allowed = {PROJECT_ROOT}
+    extra = os.getenv("QA_ENGINE_WORKSPACE_ALLOWLIST", "")
+    for p in (p.strip() for p in extra.split(os.pathsep) if p.strip()):
+        _allowed.add(Path(p).resolve())
+    if not any(
+        resolved == allowed or str(resolved).startswith(str(allowed) + os.sep)
+        for allowed in _allowed
+    ):
+        raise HTTPException(
+            status_code=403,
+            detail=(
+                "Path is outside the allowed workspace roots. "
+                "Set QA_ENGINE_WORKSPACE_ALLOWLIST to permit additional directories."
+            ),
+        )
     app_state["workspace_root"] = str(resolved)
     return {"success": True, "root": str(resolved)}
 
@@ -1428,7 +1457,7 @@ def create_test_run(req: TestRunRequest):
     try:
         completed = subprocess.run(
             command,
-            cwd=PROJECT_ROOT,
+            cwd=_effective_workspace_root(),
             capture_output=True,
             text=True,
             timeout=timeout,
@@ -1533,11 +1562,20 @@ def _build_generation_prompt(files: list[tuple[str, str]]) -> str:
 
 
 def _strip_code_fences(code: str) -> str:
+    """Remove opening/closing markdown code fences from anywhere in the output.
+
+    Models sometimes prepend a commentary line before the opening fence, so we
+    scan all lines rather than assuming the fence is always first/last.
+    """
     lines = code.strip().splitlines()
-    if lines and lines[0].startswith("```"):
-        lines = lines[1:]
-    if lines and lines[-1].strip() == "```":
-        lines = lines[:-1]
+    # Find first opening fence (``` or ```python etc.)
+    open_idx = next((i for i, ln in enumerate(lines) if ln.strip().startswith("```")), None)
+    if open_idx is not None:
+        lines = lines[open_idx + 1:]
+    # Find last closing fence
+    close_idx = next((i for i in range(len(lines) - 1, -1, -1) if lines[i].strip() == "```"), None)
+    if close_idx is not None:
+        lines = lines[:close_idx]
     return "\n".join(lines).strip()
 
 
@@ -1556,7 +1594,7 @@ def generate_tests(req: GenerateTestsRequest):
         {"role": "user", "content": _build_generation_prompt(files)},
     ]
     try:
-        raw = provider.chat_completion(turns, DEFAULT_CHAT_MODEL)
+        raw = provider.chat_completion(turns, None)
     except ProviderError as exc:
         raise HTTPException(status_code=exc.status_code, detail=exc.public_message) from exc
 

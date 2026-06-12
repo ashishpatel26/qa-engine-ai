@@ -484,7 +484,11 @@ function OAuthProviderCard({ service, connected, user, onSuccess, onDisconnect }
             >
               <div className="flex items-center gap-2 text-xs font-semibold" style={{ color: accentText }}>
                 <span className="material-symbols-outlined text-[15px]">check_circle</span>
-                <span>Provider connected after backend verification</span>
+                <span>Profile verified — identity confirmed</span>
+              </div>
+              <div className="flex items-start gap-2 text-[10px] rounded-md p-2 mt-1" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.5)' }}>
+                <span className="material-symbols-outlined text-[12px] flex-shrink-0 mt-0.5">info</span>
+                <span>Chat and test generation still require an API key in the Chat panel. This connection verifies your identity only.</span>
               </div>
               {user?.models && user.models.length > 0 && (
                 <div className="space-y-2">
